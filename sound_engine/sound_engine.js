@@ -17,6 +17,7 @@ let soundContainer = function (_address, _ctxt) {
   let address = _address;
   let ctxt = _ctxt;
   let buffer = null;
+  let gain = 1;
   let node;
   
   loadSoundData(address, ctxt, this);
@@ -24,45 +25,62 @@ let soundContainer = function (_address, _ctxt) {
   this.play = (_time, _speed, _offset)=> {
     _time = _time || 0;
     _speed = _speed || 1;
+    const amp = new GainNode(ctxt, {gain});
     const source = ctxt.createBufferSource();
     source.buffer = buffer;
     source.playbackRate.value = _speed;
-    if(node != undefined) source.connect(node);
-    else source.connect(ctxt.destination);
+    source.connect(amp);
+    if(node != undefined) amp.connect(node);
+    else amp.connect(ctxt.destination);
     //const offset = _offset || 0;
     source.start(ctxt.currentTime + _time, source.buffer.duration * (_offset||0));
     return source;
   }
   
-  this.connect = (_node)=> {
+  this.connect = (_node) => {
     if(_node != undefined && _node.hasOwnProperty('input')) node = _node;
     else throw Error('Not a valid node');
   }
   
-  this.setBuffer = (_data) =>{
+  this.setBuffer = (_data) => {
     buffer = _data;
-  }  
+  }
+
+  this.setGain = (_gain) => {
+    gain = _gain;
+  }
 }
 
 
 function createRandomizer(sounds){
   const soundContainers = [];
 
-  let prevIndex = -1;
+  let prevIndex = 0;
 
   sounds.forEach((sound) => {
     soundContainers.push(new soundContainer(sound, audioCtx))
   });
 
-  function play(){
+  function playRandom(time, speed, offset){
     let ind = Math.floor(Math.random()*soundContainers.length);
     if(ind === prevIndex) ind = ind > 0 ? ind-1 : ind+1;
     prevIndex = ind;
-    soundContainers[ind].play(0, random(1, 1.1), random(0.1));
+    soundContainers[ind].play(time || 0, speed || 1, offset || 0);
+    //soundContainers[ind].play(0, random(1, 1.1), random(0.1));
+  }
+
+  function playSequence(time, speed, offset){
+    soundContainers[prevIndex].play(time || 0, speed || 1, offset || 0);
+    if(prevIndex < soundContainers.length-1) prevIndex++;
+    else prevIndex = 0;
   }
 
   return {
-    play
+    get playRandom(){return playRandom},
+    get playSequence(){return playSequence},
+    get setAmp(){return (amp) => {
+      soundContainers.forEach((container) => {container.setGain(amp)});
+    }}
   }
 }
 

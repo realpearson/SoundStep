@@ -21,7 +21,7 @@ const testSound2 = new soundContainer("assets/audio_files/notes-2.wav", audioCtx
 
 //desktop_sandbox, user_app
 function createAppState(){
-  let mode = "mobile"//window.innerWidth <= 600 ? "mobile" : "desktop";
+  let mode = window.innerWidth <= 600 ? "mobile" : "desktop";
   
   return {
     get modes(){return {mobile: "mobile", desktop: "desktop"}},

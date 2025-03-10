@@ -1,13 +1,5 @@
 const MobileAppProcessors = [];
 
-//Temp Ugly Sound Stuf...
-const soundAddressBirds = "assets/audio_files/Ambience/Ambience bird";
-let birdaddresses = [];
-for(let i = 0; i < 10; i++) birdaddresses.push(soundAddressBirds + (i +1) + ".wav");
-const birds = createRandomizer(birdaddresses);
-
-const wind = new soundContainer("assets/audio_files/Ambience/Wind Ambience.wav", audioCtx);
-
 
 
 function createTestSimulatorSession(){
@@ -17,11 +9,20 @@ function createTestSimulatorSession(){
     for(let i = 0; i < 10; i++) addresses.push(soundAddress + (i +1) + ".wav");
     const foots = createRandomizer(addresses);
 
+    const soundAddressBirds = "assets/audio_files/Ambience/Ambience bird";
+    let birdaddresses = [];
+    for(let i = 0; i < 10; i++) birdaddresses.push(soundAddressBirds + (i +1) + ".wav");
+    const birds = createRandomizer(birdaddresses);
+
+    const wind = new soundContainer("assets/audio_files/Ambience/Wind Ambience.wav", audioCtx);
+    let windVoice;
+
     //Listeners
     const stepListeners = {
         //onHiPeakEvents: [() => foots.play()],
-        onLoPeakEvents: [() => foots.play()]
+        onLoPeakEvents: [() => foots.play(0, random(1, 1.1), random(0.1))]
     }
+    //soundContainers[ind].play(0, random(1, 1.1), random(0.1));
     //....
 
     //Processors
@@ -42,21 +43,24 @@ function createTestSimulatorSession(){
         {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
     ]
 
-    //Simulator Settings
 
-    let windplay = false;
+    //These need to get called in both simulator and runrecorder!!!!
+    //!!!!!!!
+    function onActivate(){
+        windVoice = wind.play().loop = true;
+        //SEt interval...
+        //if(Math.random()< 0.005) birds.play();
+    }
+
+    function onDeactivate(){
+        windVoice.stop(0);
+        windVoice = null;
+    }
+
+
+
     //Simulator Rendering
     function render(){
-        //if(!simulator) return;
-
-        //simulator.increment();
-        //if(Math.random()< 0.005) birds.play();
-        if(!windplay){
-            wind.play().loop = true;
-            windplay = true;
-        }
-
-        //Render from processors rather than raw data (for now)
         renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel");
         renderDataCurve(peakYProcessor.data, 0.5, 60 + laneSpacing);
         renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2);
@@ -72,8 +76,16 @@ function createTestSimulatorSession(){
 }
 
 const testSimulatorPreset = createTestSimulatorSession();
-MobileAppProcessors.push({processorArray: testSimulatorPreset.processors, name: "test preset"});
+MobileAppProcessors.push({
+    simulatorSession: testSimulatorPreset, 
+    processorArray: testSimulatorPreset.processors, 
+    name: "test preset"
+});
 
+
+//CreateAsphaltSim
+//CreateGravelSim
+//CreateMusicSim
 
 //Old reference
 /*//This will be done by user later, now just testing...
