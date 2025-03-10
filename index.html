@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+    <main>
+      <div id="AppView" hidden="true">
+        <canvas id="appCnv"></canvas>
+        <select id="SonificationPresets" style="position: absolute;">
+          <option>Select Style:</option>
+        </select>
+        <button id="saveBttn" class="button-1" style="position: absolute;">SAVE</button>
+        <button id="recordBttn" class="button-1" style="position: absolute;">Record</button>
+      </div>
+      
+      <div id="DesktopView" hidden="true">
+        <canvas id="desktopCnv"></canvas>
+
+        <div id="Lane1" style="position: absolute">Lane 1</div>
+        <div id="Lane2" style="position: absolute">Lane 2</div>
+        <div id="Lane3" style="position: absolute">Lane 3</div>
+        <div id="Lane4" style="position: absolute">Lane 4</div>
+        <button id="Play" class="button-60">Play</button>
+        <button id="Stop" class="button-60">Stop</button>
+        <button id="Reset" class="button-60">Reset</button>
+        <hr>
+        <p style="font-weight: bold">Import Data</p>
+        <select id="SelectRunData">
+          <option>SelectRunData:</option>
+          <option value="assets/data/SampleData/runData_JogSample.json">Jog Sample</option>
+          <option value="assets/data/SampleData/runData_RunSample.json">Run Sample</option>
+          <option value="assets/data/SampleData/runData_WalkSample.json">Walk Sample</option>
+        </select>
+        <input id="loadBttn" name="LOAD" required minlength="4" maxlength="8" size="10" type="file" />
+        <p>Global data...</p>
+      </div>
+
+
+      
+    </main>
+    <script src="sound_engine/sound_engine.js"></script>
+    <script src="datahandler.js"></script>
+    <script src="dataviewer.js"></script>
+    <script src="presets.js"></script>
+    <script src="runrecorder.js"></script>
+    <script src="sketch.js"></script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+>>>>User Instructions<<<<
+
+Setup
+-Screen orientation lock?
+-Turn off autosleep on phone
+
+1.) Open app and activate
+-
+-
+-
+
+2.) Place phone in belt with the screen facing out and arrow/triangle pointing
+up when belt is on.
+
+3.) Jump to start recording & enjoy your run!
+
+4.) After run save the data
+
+
+
+<<<<<<<WORKFLOW>>>>>>>
+
+1.) Record data via mobile app
+2.) Import data into desktop simulator
+3.) Add processors and sonification events
+4.) Export processing/ sonification layer
+5.) Deploy processing/ sonification to mobile app
+
+
+
+AUDIO APPROACHES
+
+-Trigger different transient sounds for each event
+-Trigger attack/release envelopes on continuous sound on events
+-Modulate or use effects on continuous sounds on events (env)
+-Modulate continuous using raw data
+-Combine above
