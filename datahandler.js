@@ -1,47 +1,6 @@
-//Data Objects
-
-function calculateFramerateData(){
-  //let averageFR;
-  let frAccumulated = 0;
-  let framesElapsed;
-  let minFR = 0;
-  let maxFR = 0;
-  
-  return {
-    get averageFrameRate(){return frAccumulated/framesElapsed},
-    inputFR: function(fr){
-      framesElapsed++;
-      frAccumulated += fr;
-      if(fr > maxFR) maxFR = fr;
-      if(fr < minFR) minFR = fr;
-    }
-  }
-}
-
-
 //Store all raw data -> divide into processing buffers -> process data
 //SessionData=(globals/everything) -> processing buffers
 //Press record-> Create session, create global data, create raw data, map to processing buffers
-
-/* 
-Events for hi & lo peaks seperate
-High level analysis for running (left right foot based on polarity of accel data on x plane)
-
-Application
-
->Phone App
--Record data
--Sonification system
--UI
--Send/ download data
-
->Analysis Software (computer)
--Rcv/ upload data from user
--Analyze data, step through data, scroll in/ out
--Debug mode for algorithm (step)
-*/
-
-
 
 
 function createSession(name){
@@ -167,8 +126,6 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     const peakObj = data[peakCandidateIndex];
     const polarity = Math.sign(peakObj);
     
-    //!!!!!!!!!!!!!!!
-    //peakObj.metaData.peakData = {isPeak: true, polarity}
     peakData[peakCandidateIndex].isPeak = true;
     
     //FIRE EVENTS
@@ -205,6 +162,16 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
       if(framesSincePeakCandidate >= framesUntilPeakConfirm) confirmPeak();
     }
   }
+
+  function resetProcessor(){
+    resetBuffer();
+    peakCandidateIndex = -1;
+    framesSincePeakCandidate = 0;
+    framesSincePrevPeak = 0;
+    data.length = 0;
+    peakData.length = 0;
+    index = 0;
+  }
   
   return {
     get analyzeRealtime(){return (dataPoint, debugMode) => {
@@ -227,9 +194,7 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     }},
     
     get data(){return peakData},
-    get reset(){return () => {
-      //reset everything, empty data...
-    }}
+    get resetProcessor(){return resetProcessor}
   }
 }
 
@@ -239,7 +204,7 @@ function createDataBucket(){
   return {
     get analyzeRealtime(){return (dataPoint) => bucket.push({value: dataPoint})},
     get data(){return bucket},
-    get reset(){return () => bucket.length = 0}
+    get resetProcessor(){return () => bucket.length = 0}
   }
 }
 
@@ -295,6 +260,14 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     listeners?.forEach((listener) => {listener()});
   }
 
+  function resetProcessor(){
+    index = 0;  
+    data.length = 0;
+    zeroCrossingData.length = 0;;
+    zeroCrossingCandidateIndex = -1;
+    resetMet = false;
+  }
+
   return {
     get analyzeRealtime(){return (dataPoint, debugMode) => {
       debug = debugMode;
@@ -312,13 +285,12 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     }},
     
     get data(){return zeroCrossingData},
-    get reset(){return () => {
-      //reset everything, empty data...
-    }}
+    get resetProcessor(){return resetProcessor}
   }
 }
 
 function createThresholdAnalyzer(){
+  //-Basic thresholds
   //threshold enter, stay, exit events
 }
 

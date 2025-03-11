@@ -73,6 +73,11 @@ function draw() {
     fill(255)
     triangle(0, 0, 50, 25, 0, 50);
     pop();
+
+    stroke(245);
+    strokeWeight(4);
+    rect(width/4, height/4, width/4, width/4);
+    rect(width/4 + width/4, height/4 + width/4-width/5, width/5, width/5);
   }
   
   if(appState.mode === appState.modes.desktop){

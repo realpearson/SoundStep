@@ -28,11 +28,18 @@ stopButton.onclick = () => {
   simulator.stop();
 }
 
+const resetButton = document.getElementById("Reset");
+resetButton.onclick = () => {
+  if(!simulator) return;
+  simulator.reset();
+}
 
+//This is still very ugly...
+//Called by fetch in datahandler.js
 function onImportData(data){
   currentData = data;
-  simulator = createSimulator(data, testProcessorArr);
-  simulator.setDataPos(450);
+  simulator = createSimulator(data);
+  //simulator.setDataPos(450);
 }
 
 const loadBttn = document.getElementById("loadBttn");
@@ -49,17 +56,15 @@ async function fetchLocalData(event){
     currentData = data;
     simulator = createSimulator(data);
 
+    //Dont hard code this...
     simulator.loadPreset(gravelSimulatorPreset);
-    simulator.setDataPos(450);
+    simulator.setDataPos(500);
   }
 }
 dataSelect.addEventListener("change", fetchLocalData);
 
 function updateSimulator(){
   if(!simulator) return;
-
-  //Add frame rate target algorithm
-  simulator.increment();
   simulator.increment();
   simulator.render();
 }
@@ -79,13 +84,15 @@ function renderDataCurve(buffer, scalar, yPos, name){
   beginShape();
   if(buffer.length < 1) return;
   for(let i = 0; i < buffer.length; i++){
-    point(i, -buffer[i].value * scalar + yPos);
+    let x = i;
+    if(buffer.length >= width) x -= (buffer.length-width);
+    point(x, -buffer[i].value * scalar + yPos);
     //vertex(i, -buffer[i].value * scalar + yPos);
 
-    if(buffer[i].isPeak) circle(i, -buffer[i].value * scalar + yPos, 5);
+    if(buffer[i].isPeak) circle(x, -buffer[i].value * scalar + yPos, 5);
     if(buffer[i].isZeroCrossing) {
       fill(240, 0, 0);
-      circle(i, -buffer[i].value * scalar + yPos, 5);
+      circle(x, -buffer[i].value * scalar + yPos, 5);
       noFill();
     }
   }
@@ -94,43 +101,68 @@ function renderDataCurve(buffer, scalar, yPos, name){
 
 
 function createSimulator(data){
+  //Loaded in via preset
   let processors;
   let render;
   let preset;
 
+  //Internal Logic
   let active = false;
-  
   let inc = 0;
-  
+  let timeOffsetAccumulator = 0;
+  let dataFrameLen = calcDataFR();
+  const discrepencyThreshold = 2;
+
+  function calcDataFR(){
+    let totMillis = 0;
+    for(let i = 1; i < data.session.length; i++){
+      totMillis += data.session[i].timestamp-data.session[i-1].timestamp;
+    }    
+    return (totMillis / data.session.length-1);
+  }
+
+
   function increment(debug){
     if(!active) return;
     if(inc >= data.session.length-1) return;
 
+    //Accumulate difference between target frame length and actual
+    timeOffsetAccumulator += deltaTime-dataFrameLen;
+
+    if(timeOffsetAccumulator > discrepencyThreshold * dataFrameLen){
+      //Insert extra frame to compensate
+      step(debug);
+      step(debug);
+      timeOffsetAccumulator -= discrepencyThreshold * dataFrameLen;
+    } else if(timeOffsetAccumulator < -discrepencyThreshold * dataFrameLen){
+      //Skip frame to compensate
+      timeOffsetAccumulator += discrepencyThreshold * dataFrameLen;
+    } else {
+      step(debug);
+    }
+    
+    if(debug) console.log("------------------");
+  }
+
+  function step(debug){
     processors.forEach((p) => {
       p.processor.analyzeRealtime(data.session[inc][p.sensorType][p.axis], debug);
     });
 
     inc++;
-    
-    if(debug) console.log("------------------");
   }
 
-  function getCurrentData(sensorType, axis){
-    return data.session[inc][sensorType][axis];
-  }
 
-  function getRawData(sensorType, axis){
-    const bucket = [];
-    data.session.forEach((d) => {
-      bucket.push({value: d[sensorType][axis]});
-    });
-    return bucket;
+  function reset(){
+    //Reset Simulator
+    timeOffsetAccumulator = 0;
+    inc = 0;
+    //Reset Processors
+    processors.forEach((p) => p.processor.resetProcessor());
   }
   
   return {
     get increment(){return increment},
-    get getCurrentData(){return getCurrentData},
-    get getRawData(){return getRawData},
     get setDataPos(){return (pos) => {inc = pos < data.session.length ? pos : inc}},
     get dataPos(){return inc},
     get loadPreset(){return function(simPreset){
@@ -148,69 +180,7 @@ function createSimulator(data){
     }},
     get render(){return function(){
       if(render) render();
-    }}
+    }},
+    get reset(){return reset}
   }
 }
-
-
-/*function createSimulator(data, processors){
-  
-  let inc = 0;
-  
-  function increment(debug){
-    if(inc >= data.session.length-1) return;
-    //tempBuffer.analyzeRealtime(dataBuffer.data[inc], debug)
-    processors.forEach((p) => {
-      p.processor.analyzeRealtime(data.session[inc][p.sensorType][p.axis], debug);
-    });
-    inc++;
-    if(debug) console.log("------------------");
-  }
-
-  function getCurrentData(sensorType, axis){
-    return data.session[inc][sensorType][axis];
-  }
-
-  function getRawData(sensorType, axis){
-    const bucket = [];
-    data.session.forEach((d) => {
-      bucket.push({value: d[sensorType][axis]});
-    });
-    return bucket;
-  }
-  
-  return {
-    get increment(){return increment},
-    get getCurrentData(){return getCurrentData},
-    get getRawData(){return getRawData},
-    get setDataPos(){return (pos) => {inc = pos < data.session.length ? pos : inc}},
-    get dataPos(){return inc}
-  }
-} */
-
-
-
-//EVENTS
-//-Hi/lo peaks
-//-zero crossing
-//-Basic thresholds 
-
-//Modulations
-//-raw
-
-
-//Data viewer
-//Simulator playback (match fps of user, use audio scheduling?)
-//Simulator Debug stepper (debug processing algos)
-//Simulator start, stop, reset
-
-//Data lanes
-//Global data
-//Data increment pos (array)
-//points/ vertex
-//Zoom vertical/ horizontal
-//Scroll
-//What data to assign to lanes (to see)
-
-//Add custom sounds/ events
-//Synth patches, audio manipulation

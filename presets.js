@@ -51,15 +51,13 @@ function createAsphaltSimulatorSession(){
     function onActivate(){
         windVoice = wind.play();
         windVoice.loop = true;
-        //SEt interval...
-        //if(Math.random()< 0.005) birds.playRandom(0, random(1, 1.1));
+
         birdTimeoutID = setTimeout(() => {
             birds.playRandom(0, random(1, 1.1));
         }, random(750));
     }
 
     function onDeactivate(){
-        //console.log(windVoice)
         windVoice.stop(0);
         windVoice = null;
         clearTimeout(birdTimeoutID);
@@ -102,7 +100,7 @@ function createGravelSimulatorSession(){
     let birdaddresses = [];
     for(let i = 0; i < 10; i++) birdaddresses.push(soundAddressBirds + (i +1) + ".wav");
     const birds = createRandomizer(birdaddresses);
-    birds.setAmp(0.3);
+    birds.setAmp(0.1);
     let birdTimeoutID;
 
     const wind = new soundContainer("assets/audio_files/Ambience/Wind Ambience.wav", audioCtx);
@@ -140,16 +138,20 @@ function createGravelSimulatorSession(){
     function onActivate(){
         windVoice = wind.play();
         windVoice.loop = true;
-        //SEt interval...
-        //if(Math.random()< 0.005) birds.playRandom(0, random(1, 1.1));
-        birdTimeoutID = setTimeout(() => {
-            birds.playRandom(0, random(1, 1.1));
-        }, random(750));
+
+        function birdTrigger(){
+            birds.playRandom(0, random(0.9, 1.8));
+            birdTimeoutID = setTimeout(birdTrigger, random(3750))
+        }
+
+        birdTrigger();
+
+        //Good place to set data offset
     }
 
     function onDeactivate(){
         //console.log(windVoice)
-        windVoice.stop(0);
+        if(windVoice) windVoice.stop(0);
         windVoice = null;
         clearTimeout(birdTimeoutID);
     }

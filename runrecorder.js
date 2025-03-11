@@ -26,6 +26,7 @@ sonificationPresets.addEventListener("change", () => {
 let recordingOn = false;
 const saveBttn = document.getElementById("saveBttn");
 const recordBttn = document.getElementById("recordBttn");
+const title = document.getElementById("Title");
 let logo;
 
 
@@ -36,6 +37,9 @@ function initializeRunRecorder(){
 
 function initializeAppUX(){
   //UI & DOM
+  title.style.left = `${windowWidth/2 -120}px`;
+  title.style.top = `${50}px`;
+
   saveBttn.style.left = `${windowWidth/2 -26}px`;
   saveBttn.style.top = `${windowHeight-50}px`;
   //saveBttn.hidden = false;
@@ -56,8 +60,11 @@ function initializeAppUX(){
     }
   };
 
-  sonificationPresets.style.left = `${windowWidth/2 -26}px`;
-  sonificationPresets.style.top = `${windowHeight/2 -26}px`;
+  //iOS Sensor Data Permission Handling
+  recordBttn.addEventListener("mousedown", requestSensorPermission, {once:true});
+
+  sonificationPresets.style.left = `${windowWidth/4}px`;
+  sonificationPresets.style.top = `${windowHeight/1.5}px`;
 }
 
 
@@ -70,6 +77,26 @@ function recordData(){
 }
 
 
+function requestSensorPermission() {
+  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+    alert("enter"); //Do we need this?
+    DeviceMotionEvent.requestPermission()
+      .then((response) => {
+        alert("resp" + response);
+        if (response == "granted") {
+          //do we need to do anything here or is this enough
+          //for p5 to take over and start working?
+        }
+      }).catch(console.error);
+  } //else-> DeviceMotionEvent is not defined
+}
+
+/*         
+ window.addEventListener("devicemotion", (e) => {
+            // do something with e
+            console.log(e);
+          });
+ */
 
 
 /*
