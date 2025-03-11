@@ -20,9 +20,9 @@ function createTestSimulatorSession(){
     //Listeners
     const stepListeners = {
         //onHiPeakEvents: [() => foots.play()],
-        onLoPeakEvents: [() => foots.play(0, random(1, 1.1), random(0.1))]
+        onLoPeakEvents: [() => foots.playRandom(0, random(1, 1.1), random(0.1))]
     }
-    //soundContainers[ind].play(0, random(1, 1.1), random(0.1));
+    
     //....
 
     //Processors
@@ -49,7 +49,7 @@ function createTestSimulatorSession(){
     function onActivate(){
         windVoice = wind.play().loop = true;
         //SEt interval...
-        //if(Math.random()< 0.005) birds.play();
+        //if(Math.random()< 0.005) birds.playRandom(0, random(1, 1.1));
     }
 
     function onDeactivate(){
