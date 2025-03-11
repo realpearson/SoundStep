@@ -49,7 +49,7 @@ async function fetchLocalData(event){
     currentData = data;
     simulator = createSimulator(data);
 
-    simulator.loadPreset(testSimulatorPreset);
+    simulator.loadPreset(gravelSimulatorPreset);
     simulator.setDataPos(450);
   }
 }
@@ -96,6 +96,7 @@ function renderDataCurve(buffer, scalar, yPos, name){
 function createSimulator(data){
   let processors;
   let render;
+  let preset;
 
   let active = false;
   
@@ -132,12 +133,19 @@ function createSimulator(data){
     get getRawData(){return getRawData},
     get setDataPos(){return (pos) => {inc = pos < data.session.length ? pos : inc}},
     get dataPos(){return inc},
-    get loadPreset(){return function(preset){
-      processors = preset.processors;
-      render = preset.render;
+    get loadPreset(){return function(simPreset){
+      processors = simPreset.processors;
+      render = simPreset.render;
+      preset = simPreset;
     }},
-    get play(){return () => active = true},
-    get stop(){return () => active = false},
+    get play(){return () => {
+      active = true;
+      preset.onActivate();
+    }},
+    get stop(){return () => {
+      active = false;
+      preset.onDeactivate();
+    }},
     get render(){return function(){
       if(render) render();
     }}

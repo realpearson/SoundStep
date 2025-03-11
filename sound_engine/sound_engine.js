@@ -66,7 +66,6 @@ function createRandomizer(sounds){
     if(ind === prevIndex) ind = ind > 0 ? ind-1 : ind+1;
     prevIndex = ind;
     soundContainers[ind].play(time || 0, speed || 1, offset || 0);
-    //soundContainers[ind].play(0, random(1, 1.1), random(0.1));
   }
 
   function playSequence(time, speed, offset){

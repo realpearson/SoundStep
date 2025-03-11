@@ -94,7 +94,7 @@ function draw() {
 
 
 function mousePressed(){
-  console.log(frameRate());
+  //console.log(frameRate());
   //if(simulator) simulator.increment(true);
   
   if(appState.mode === appState.modes.mobile){

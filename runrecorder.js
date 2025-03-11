@@ -1,5 +1,7 @@
 let currentSession = createSession();
 
+let currentSimPreset;
+
 const sonificationPresets = document.getElementById("SonificationPresets");
 MobileAppProcessors.forEach((preset) => {
   const opt = document.createElement("option");
@@ -14,6 +16,7 @@ sonificationPresets.addEventListener("change", () => {
     if(MobileAppProcessors[i].name === sonificationPresets.value) ind = i;
   }
   const procArr = MobileAppProcessors[ind].processorArray;
+  currentSimPreset = MobileAppProcessors[ind].asphaltSimulatorPreset;
 
   procArr.forEach((proc) => currentSession.connectRealtimeProcessor(proc.processor, proc.sensorType, proc.axis));
 });
@@ -46,6 +49,11 @@ function initializeAppUX(){
   recordBttn.onclick = () => {
     recordingOn = !recordingOn;
     recordBttn.style.backgroundColor = recordingOn ? "#F082AC" : "#EA4C89";
+    if(recordingOn){
+      currentSimPreset.onActivate();
+    } else {
+      currentSimPreset.onDeactivate();
+    }
   };
 
   sonificationPresets.style.left = `${windowWidth/2 -26}px`;
