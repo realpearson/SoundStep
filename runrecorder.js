@@ -16,7 +16,7 @@ sonificationPresets.addEventListener("change", () => {
     if(MobileAppProcessors[i].name === sonificationPresets.value) ind = i;
   }
   const procArr = MobileAppProcessors[ind].processorArray;
-  currentSimPreset = MobileAppProcessors[ind].asphaltSimulatorPreset;
+  currentSimPreset = MobileAppProcessors[ind].simulatorSession;
 
   procArr.forEach((proc) => currentSession.connectRealtimeProcessor(proc.processor, proc.sensorType, proc.axis));
 });

@@ -92,7 +92,7 @@ function createSession(name){
 //---------------------------------Data Processing & Analyzers-------------------------------------
 
 const defaultPeakSettings = {
-  framesUntilPeakConfirm: 2,
+  framesUntilPeakConfirm: 3,
   frameCooldownThresh: 10,
   hiMode: {peakThresh: 5, resetThresh: 1},
   loMode: {peakThresh: -5, resetThresh: -1},
