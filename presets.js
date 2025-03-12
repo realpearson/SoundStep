@@ -192,6 +192,8 @@ function createMusicASimulatorSession(){
 
     let rhode = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 1.wav", audioCtx);
 
+    let vox = new soundContainer("assets/audio_files/OskarMusic//Percussive vox 2.wav", audioCtx);
+
     let melloAdresses = [
         "assets/audio_files/OskarMusic/Harmony piano 1.wav",
         "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
@@ -207,14 +209,29 @@ function createMusicASimulatorSession(){
     for(let i = 0; i < 2; i++) hihatAddresses.push(hihatBaseAddress + (i +1) + ".wav");
     let hats = createRandomizer(hihatAddresses);
 
+    function rhodesTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+
+            
+            if( counter === 4) vox.play()
+            counter++;
+        }
+    }
+
+    let myRhodeTrig = rhodesTrigger();
+
     //Listeners
     const peakListeners = {
-        onHiPeakEvents: [() => mello.playSequence()],
+        onHiPeakEvents: [() => mello.playSequence(), myRhodeTrig],
         onLoPeakEvents: [() => percs.playSequence()]
     }
     
     const nullListeners = [
-        () => hats.playRandom(0, random(6, 7)),
+        //() => hats.playRandom(0, random(6, 7)),
+        //myRhodeTrig
         //() => rhode.play()
     ]
     
@@ -228,7 +245,7 @@ function createMusicASimulatorSession(){
     const processorArr = [
         {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
         {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
-    ]
+    ]   
 
 
     //These need to get called in both simulator and runrecorder!!!!
@@ -263,6 +280,106 @@ MobileAppProcessors.push({
     processorArray: musicASimulatorPreset.processors, 
     name: "Music Style 1"
 });
+
+/*function createMusicASimulatorSession(){
+    //Setup Sounds
+    let kick = new soundContainer("assets/audio_files/OskarMusic/Beat kick 1.wav", audioCtx);
+
+    let percs = createRandomizer(["assets/audio_files/OskarMusic/Beat kick 1.wav",
+        "assets/audio_files/OskarMusic/Beat snare 1.wav"
+    ]);
+
+    let rhode = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 1.wav", audioCtx);
+
+    let vox = new soundContainer("assets/audio_files/OskarMusic//Percussive vox 2.wav", audioCtx);
+
+    let melloAdresses = [
+
+        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
+        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
+        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
+        "assets/audio_files/OskarMusic/Harmony Rhodes 3.wav",
+        "assets/audio_files/OskarMusic/Harmony Rhodes 2.wav",
+        
+    ]
+    let mello = createRandomizer(melloAdresses);
+
+    const hihatBaseAddress = "assets/audio_files/OskarMusic/Percussive hat ";
+    let hihatAddresses = [];
+    for(let i = 0; i < 2; i++) hihatAddresses.push(hihatBaseAddress + (i +1) + ".wav");
+    let hats = createRandomizer(hihatAddresses);
+
+    function rhodesTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+
+            if(counter <= 8 && counter !== 4 ) mello.playRandom();
+            
+            
+        }
+    }
+
+    let myRhodeTrig = rhodesTrigger();
+
+    //Listeners
+    const peakListeners = {
+        onHiPeakEvents: [vox.play],
+        //onLoPeakEvents: [myRhodeTrig]
+    }
+    
+    const nullListeners = [
+        //() => hats.playRandom(0, random(6, 7)),
+        myRhodeTrig
+        //() => rhode.play()
+    ]
+    
+    //....
+
+    //Processors
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, peakListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, nullListeners);
+
+    //Processor Array
+    const processorArr = [
+        {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
+        {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
+    ]   
+
+
+    //These need to get called in both simulator and runrecorder!!!!
+    function onActivate(){
+
+    }
+
+    function onDeactivate(){
+
+    }
+
+    //Simulator Rendering
+    function render(){
+        renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel Peaks");
+        renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2, "Vertical Accel Null Points");
+
+        alignmentChecker();
+    }
+
+    return {
+        get onActivate(){return onActivate},
+        get onDeactivate(){return onDeactivate},
+        get processors(){return processorArr},
+        get render(){return render}
+    }
+}
+
+const musicASimulatorPreset = createMusicASimulatorSession();
+
+MobileAppProcessors.push({
+    simulatorSession: musicASimulatorPreset, 
+    processorArray: musicASimulatorPreset.processors, 
+    name: "Music Style 1"
+}); */
 
 
 
