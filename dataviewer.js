@@ -57,7 +57,7 @@ async function fetchLocalData(event){
     simulator = createSimulator(data);
 
     //Dont hard code this...
-    simulator.loadPreset(gravelSimulatorPreset);
+    simulator.loadPreset(musicASimulatorPreset);
     simulator.setDataPos(500);
   }
 }

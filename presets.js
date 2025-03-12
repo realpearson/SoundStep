@@ -186,19 +186,36 @@ function createMusicASimulatorSession(){
     //Setup Sounds
     let kick = new soundContainer("assets/audio_files/OskarMusic/Beat kick 1.wav", audioCtx);
 
+    let percs = createRandomizer(["assets/audio_files/OskarMusic/Beat kick 1.wav",
+        "assets/audio_files/OskarMusic/Beat snare 1.wav"
+    ]);
+
+    let rhode = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 1.wav", audioCtx);
+
+    let melloAdresses = [
+        "assets/audio_files/OskarMusic/Harmony piano 1.wav",
+        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
+        "assets/audio_files/OskarMusic/Percussive vox 2.wav",
+        "assets/audio_files/OskarMusic/Harmony piano 2.wav",
+        "assets/audio_files/OskarMusic/Harmony piano 3.wav",
+        "assets/audio_files/OskarMusic/Harmony piano 4.wav",
+    ]
+    let mello = createRandomizer(melloAdresses);
+
     const hihatBaseAddress = "assets/audio_files/OskarMusic/Percussive hat ";
     let hihatAddresses = [];
-    for(let i = 0; i < 6; i++) hihatAddresses.push(hihatBaseAddress + (i +1) + ".wav");
+    for(let i = 0; i < 2; i++) hihatAddresses.push(hihatBaseAddress + (i +1) + ".wav");
     let hats = createRandomizer(hihatAddresses);
 
     //Listeners
     const peakListeners = {
-        onHiPeakEvents: [() => kick.play()],
-        onLoPeakEvents: [() => hats.playRandom(0, random(1, 1.1))]
+        onHiPeakEvents: [() => mello.playSequence()],
+        onLoPeakEvents: [() => percs.playSequence()]
     }
     
     const nullListeners = [
-        () => hats.playRandom(0, random(1, 1.1)),
+        () => hats.playRandom(0, random(6, 7)),
+        //() => rhode.play()
     ]
     
     //....
@@ -240,6 +257,7 @@ function createMusicASimulatorSession(){
 }
 
 const musicASimulatorPreset = createMusicASimulatorSession();
+
 MobileAppProcessors.push({
     simulatorSession: musicASimulatorPreset, 
     processorArray: musicASimulatorPreset.processors, 
