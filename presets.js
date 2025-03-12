@@ -182,31 +182,72 @@ MobileAppProcessors.push({
 });
 
 
+function createMusicASimulatorSession(){
+    //Setup Sounds
+    let kick = new soundContainer("assets/audio_files/OskarMusic/Beat kick 1.wav", audioCtx);
+
+    const hihatBaseAddress = "assets/audio_files/OskarMusic/Percussive hat ";
+    let hihatAddresses = [];
+    for(let i = 0; i < 6; i++) hihatAddresses.push(hihatBaseAddress + (i +1) + ".wav");
+    let hats = createRandomizer(hihatAddresses);
+
+    //Listeners
+    const peakListeners = {
+        onHiPeakEvents: [() => kick.play()],
+        onLoPeakEvents: [() => hats.playRandom(0, random(1, 1.1))]
+    }
+    
+    const nullListeners = [
+        () => hats.playRandom(0, random(1, 1.1)),
+    ]
+    
+    //....
+
+    //Processors
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, peakListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, nullListeners);
+
+    //Processor Array
+    const processorArr = [
+        {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
+        {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
+    ]
+
+
+    //These need to get called in both simulator and runrecorder!!!!
+    function onActivate(){
+
+    }
+
+    function onDeactivate(){
+
+    }
+
+    //Simulator Rendering
+    function render(){
+        renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel Peaks");
+        renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2, "Vertical Accel Null Points");
+
+        alignmentChecker();
+    }
+
+    return {
+        get onActivate(){return onActivate},
+        get onDeactivate(){return onDeactivate},
+        get processors(){return processorArr},
+        get render(){return render}
+    }
+}
+
+const musicASimulatorPreset = createMusicASimulatorSession();
+MobileAppProcessors.push({
+    simulatorSession: musicASimulatorPreset, 
+    processorArray: musicASimulatorPreset.processors, 
+    name: "Music Style 1"
+});
+
+
+
 //CreateAsphaltSim
 //CreateGravelSim
 //CreateMusicSim
-
-//Old reference
-/*//This will be done by user later, now just testing...
-//Test Listeners
-const tlisteners = {
-    //onHiPeakEvents: [() => testSound1.play()],
-    onLoPeakEvents: [() => testSound2.play()]
-}
-
-//Test Processors
-const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, tlisteners);
-const peakYProcessor = createPeakAnalyzer(defaultPeakSettings, null);
-const peakZProcessor = createPeakAnalyzer(defaultPeakSettings, null);
-const rawYProcessor = createDataBucket();
-const rawRotZProcessor = createDataBucket();
-const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings);
-
-const testProcessorArr = [
-    {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
-    //{processor: rawYProcessor, sensorType: "acceleration", axis: "y"},
-    {processor: rawRotZProcessor, sensorType: "rotation", axis: "z"},
-    {processor: peakYProcessor, sensorType: "acceleration", axis: "y"},
-    {processor: peakZProcessor, sensorType: "acceleration", axis: "z"},
-    {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
-] */
