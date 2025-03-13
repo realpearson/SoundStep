@@ -17,7 +17,7 @@ sonificationPresets.addEventListener("change", () => {
   }
   if(ind === -1) return;
   const procArr = MobileAppProcessors[ind].processorArray;
-  currentSimPreset.onDeactivate();
+  currentSimPreset?.onDeactivate();
   currentSimPreset = MobileAppProcessors[ind].simulatorSession;
 
   procArr.forEach((proc) => currentSession.connectRealtimeProcessor(proc.processor, proc.sensorType, proc.axis));
