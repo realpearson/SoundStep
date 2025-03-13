@@ -57,7 +57,7 @@ async function fetchLocalData(event){
     simulator = createSimulator(data);
 
     //Dont hard code this...
-    simulator.loadPreset(musicASimulatorPreset);
+    simulator.loadPreset(musicBSimulatorPreset);
     simulator.setDataPos(500);
   }
 }

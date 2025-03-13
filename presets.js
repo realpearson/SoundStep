@@ -281,58 +281,90 @@ MobileAppProcessors.push({
     name: "Music Style 1"
 });
 
-/*function createMusicASimulatorSession(){
+//The new music preset, havent changed the name though
+function createMusicBSimulatorSession(){
     //Setup Sounds
-    let kick = new soundContainer("assets/audio_files/OskarMusic/Beat kick 1.wav", audioCtx);
 
-    let percs = createRandomizer(["assets/audio_files/OskarMusic/Beat kick 1.wav",
-        "assets/audio_files/OskarMusic/Beat snare 1.wav"
-    ]);
+    let rhode1 = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 1.wav", audioCtx);
+    let rhode2 = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 2.wav", audioCtx);
+    let rhode3 = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 3.wav", audioCtx);
+    let rhode5 = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 5.wav", audioCtx);
 
-    let rhode = new soundContainer("assets/audio_files/OskarMusic/Harmony Rhodes 1.wav", audioCtx);
+    let vox2 = new soundContainer("assets/audio_files/OskarMusic/Percussive vox 2.wav", audioCtx)
+    let vox3 = new soundContainer("assets/audio_files/OskarMusic/Percussive vox 3.wav", audioCtx)
+    vox3.setGain(0.5)
 
-    let vox = new soundContainer("assets/audio_files/OskarMusic//Percussive vox 2.wav", audioCtx);
+    let sub1 = new soundContainer("assets/audio_files/OskarMusic/Sub A.wav", audioCtx);
+    let sub2 = new soundContainer("assets/audio_files/OskarMusic/Sub D.wav", audioCtx);
 
-    let melloAdresses = [
-
-        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
-        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
-        "assets/audio_files/OskarMusic/Harmony Rhodes 1.wav",
-        "assets/audio_files/OskarMusic/Harmony Rhodes 3.wav",
-        "assets/audio_files/OskarMusic/Harmony Rhodes 2.wav",
-        
-    ]
-    let mello = createRandomizer(melloAdresses);
-
-    const hihatBaseAddress = "assets/audio_files/OskarMusic/Percussive hat ";
-    let hihatAddresses = [];
-    for(let i = 0; i < 2; i++) hihatAddresses.push(hihatBaseAddress + (i +1) + ".wav");
-    let hats = createRandomizer(hihatAddresses);
-
-    function rhodesTrigger(){
+    function voxTrigger(){
         let counter = 1;
 
         return function(){
             if(counter > 8) counter = 1;
-
-            if(counter <= 8 && counter !== 4 ) mello.playRandom();
-            
-            
+            if( counter === 2 ) vox2.play()
+            if( counter === 4 ) vox2.play()
+            if( counter === 6 ) vox2.play()
+            if( counter === 8) vox3.play()
+            counter++;
         }
     }
 
-    let myRhodeTrig = rhodesTrigger();
+    let myVoxTrig = voxTrigger();
+
+    function rhodeTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 16 ) counter = 1;
+
+            if( counter <= 4) rhode1.play()
+            if( counter > 4 && counter <= 6) rhode3.play()
+            if( counter > 6 && counter <= 8) rhode2.play()
+            if( counter > 8 && counter <= 15) rhode5.play()
+            if( counter > 15) rhode3.play()
+
+            counter++;
+        }
+    }
+
+    let myRhodeTrig = rhodeTrigger();
+
+    function subTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 16 ) counter = 1;
+            if( counter == 1) sub1.play()
+            if( counter == 9 )sub2.play()
+
+            counter++;
+        }
+    }
+
+    let mySubTrig = subTrigger();
+
+
+    //Added the ambience as well thought it sounded nice in the background
+    const soundAddressBirds = "assets/audio_files/Ambience/Ambience bird";
+    let birdaddresses = [];
+    for(let i = 0; i < 10; i++) birdaddresses.push(soundAddressBirds + (i +1) + ".wav");
+    const birds = createRandomizer(birdaddresses);
+    birds.setAmp(0.3);
+    let birdTimeoutID;
+
+    const wind = new soundContainer("assets/audio_files/Ambience/Wind Ambience.wav", audioCtx);
+    wind.setGain(0.5);
+    let windVoice;
 
     //Listeners
     const peakListeners = {
-        onHiPeakEvents: [vox.play],
-        //onLoPeakEvents: [myRhodeTrig]
+        onHiPeakEvents: [myVoxTrig],
+        onLoPeakEvents: [myRhodeTrig,mySubTrig,] 
     }
     
     const nullListeners = [
-        //() => hats.playRandom(0, random(6, 7)),
-        myRhodeTrig
-        //() => rhode.play()
+       
     ]
     
     //....
@@ -350,11 +382,18 @@ MobileAppProcessors.push({
 
     //These need to get called in both simulator and runrecorder!!!!
     function onActivate(){
+        windVoice = wind.play();
+        windVoice.loop = true;
 
+        birdTimeoutID = setTimeout(() => {
+            birds.playRandom(0, random(1, 1.1));
+        }, random(750));
     }
 
     function onDeactivate(){
-
+        windVoice.stop(0);
+        windVoice = null;
+        clearTimeout(birdTimeoutID);
     }
 
     //Simulator Rendering
@@ -373,13 +412,13 @@ MobileAppProcessors.push({
     }
 }
 
-const musicASimulatorPreset = createMusicASimulatorSession();
+const musicBSimulatorPreset = createMusicBSimulatorSession();
 
 MobileAppProcessors.push({
-    simulatorSession: musicASimulatorPreset, 
-    processorArray: musicASimulatorPreset.processors, 
-    name: "Music Style 1"
-}); */
+    simulatorSession: musicBSimulatorPreset, 
+    processorArray: musicBSimulatorPreset.processors, 
+    name: "Music Style 2"
+});
 
 
 
