@@ -42,7 +42,8 @@ function createSession(name){
     set globalData(val){globalData = val},
     get sessionData(){return {global: globalData, session: [...sessionData]} },
     get recordData(){return recordData},
-    get connectRealtimeProcessor(){return connectRealtimeProcessor}
+    get connectRealtimeProcessor(){return connectRealtimeProcessor},
+    get clearRealtimeProcessors(){return () => processors.length = 0}
   }
 }
 

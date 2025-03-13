@@ -31,12 +31,18 @@
         <hr>
         <p style="font-weight: bold">Import Data</p>
         <select id="SelectRunData">
-          <option>SelectRunData:</option>
+          <option>Select Run Data:</option>
           <option value="assets/data/SampleData/runData_JogSample.json">Jog Sample</option>
           <option value="assets/data/SampleData/runData_RunSample.json">Run Sample</option>
           <option value="assets/data/SampleData/runData_WalkSample.json">Walk Sample</option>
         </select>
+        <select id ="PresetSelectDesktop">
+          <option>Select Sound Preset:</option>
+        </select>
+        <p>Upload Local Run Data: 
         <input id="loadBttn" name="LOAD" required minlength="4" maxlength="8" size="10" type="file" />
+        </p>
+        
         <p>Global data...</p>
       </div>
 
@@ -46,8 +52,8 @@
     <script src="p5.js"></script>
     <script src="sound_engine/sound_engine.js"></script>
     <script src="datahandler.js"></script>
-    <script src="dataviewer.js"></script>
     <script src="presets.js"></script>
+    <script src="dataviewer.js"></script>
     <script src="runrecorder.js"></script>
     <script src="sketch.js"></script>
   </body>

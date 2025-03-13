@@ -14,14 +14,12 @@ function getDataLanes(){
   return laneElements;
 }
 
-
 const playButton = document.getElementById("Play");
 playButton.onclick = () => {
   if(!simulator) return;
   simulator.play();
 }
   
-
 const stopButton = document.getElementById("Stop");
 stopButton.onclick = () => {
   if(!simulator) return;
@@ -46,6 +44,24 @@ const loadBttn = document.getElementById("loadBttn");
 loadBttn.addEventListener("change", uploadData, false);
 
 const dataSelect = document.getElementById("SelectRunData");
+const presetSelect = document.getElementById("PresetSelectDesktop");
+
+MobileAppProcessors.forEach((preset) => {
+  const opt = document.createElement("option");
+  opt.value = preset.name;
+  opt.innerHTML = preset.name;
+  presetSelect.appendChild(opt);
+});
+
+presetSelect.addEventListener("change", () => {
+  let ind = -1;
+  for(let i = 0; i < MobileAppProcessors.length; i++){
+    if(MobileAppProcessors[i].name === presetSelect.value) ind = i;
+  }
+  if(ind === -1) return;
+  simulator?.loadPreset(MobileAppProcessors[ind].simulatorSession);
+});
+
 
 async function fetchLocalData(event){
   if(event.target.value){
@@ -57,7 +73,7 @@ async function fetchLocalData(event){
     simulator = createSimulator(data);
 
     //Dont hard code this...
-    simulator.loadPreset(musicBSimulatorPreset);
+    simulator.loadPreset(asphaltSimulatorPreset);
     simulator.setDataPos(500);
   }
 }
