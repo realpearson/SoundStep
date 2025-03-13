@@ -19,7 +19,7 @@ sonificationPresets.addEventListener("change", () => {
   const procArr = MobileAppProcessors[ind].processorArray;
   currentSimPreset?.onDeactivate();
   currentSimPreset = MobileAppProcessors[ind].simulatorSession;
-  currentSession.clearRealtimeProcessors();
+  currentSession = createSession();
   procArr.forEach((proc) => currentSession.connectRealtimeProcessor(proc.processor, proc.sensorType, proc.axis));
 });
 
