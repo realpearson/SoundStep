@@ -310,6 +310,21 @@ function createRunningAnalyzer(){
   //flight time
   //impact consistency (current vs average)
   //...
+
+  //Run State
+  //Left 1,2,3,4, Right 1,2,3,4 (interpolate to find preload etc...)
+
+  //Tempo
+  //Store the average peak to peak time over last X peaks
+  //Can be used to calculate BPM, interpolate timing between events, sonify if running at desired pace
+
+  //Variable Settings
+  //By analyzing impact forces over last X frames we can adjust analyzer settings & presets
+  //Also good for predicting next event before it happens
+
+  //Micro ML
+  //Can we create extremely small local models for simple event prediction?
+  //Can learn in realtime by comparing predictions to actual sensor results
 }
 
 

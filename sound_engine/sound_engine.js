@@ -74,9 +74,14 @@ function createRandomizer(sounds){
     else prevIndex = 0;
   }
 
+  function playSpecific(index, time, speed, offset){
+    soundContainers[index].play(time || 0, speed || 1, offset || 0);
+  }
+
   return {
     get playRandom(){return playRandom},
     get playSequence(){return playSequence},
+    get playSpecific(){return playSpecific},
     get setAmp(){return (amp) => {
       soundContainers.forEach((container) => {container.setGain(amp)});
     }}

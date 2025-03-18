@@ -52,9 +52,12 @@ function createAsphaltSimulatorSession(){
         windVoice = wind.play();
         windVoice.loop = true;
 
-        birdTimeoutID = setTimeout(() => {
-            birds.playRandom(0, random(1, 1.1));
-        }, random(750));
+        function birdTrigger(){
+            birds.playRandom(0, random(0.9, 1.8));
+            birdTimeoutID = setTimeout(birdTrigger, random(3750))
+        }
+
+        birdTrigger();
     }
 
     function onDeactivate(){
@@ -418,6 +421,210 @@ MobileAppProcessors.push({
     simulatorSession: musicBSimulatorPreset, 
     processorArray: musicBSimulatorPreset.processors, 
     name: "Music Style 2"
+});
+
+
+
+function createMusicCSimulatorSession(){
+    //Setup Sounds
+
+    const melloAddresses = [
+        "assets/audio_files/DaveMusic/Mello01.wav",
+        "assets/audio_files/DaveMusic/Mello02.wav",
+        "assets/audio_files/DaveMusic/Mello03.wav",
+        "assets/audio_files/DaveMusic/Mello04.wav",
+    ]
+    const mello = createRandomizer(melloAddresses);
+
+    const bassAddresses = [
+        "assets/audio_files/DaveMusic/Bass01.wav",
+        "assets/audio_files/DaveMusic/Bass02.wav",
+        "assets/audio_files/DaveMusic/Bass03.wav",
+    ]
+    let bass = createRandomizer(bassAddresses);
+
+    const hhAddresses = [
+        "assets/audio_files/DaveMusic/hh01.wav",
+        "assets/audio_files/DaveMusic/hh02.wav",
+        "assets/audio_files/DaveMusic/hh03.wav",
+        "assets/audio_files/DaveMusic/hh04.wav",
+    ]
+    let hh = createRandomizer(hhAddresses);
+
+    const percAddresses = [
+        "assets/audio_files/DaveMusic/Perc01.wav",
+        "assets/audio_files/DaveMusic/Perc02.wav",
+        "assets/audio_files/DaveMusic/Perc03.wav",
+    ]
+    let perc = createRandomizer(percAddresses);
+
+    let kick = new soundContainer("assets/audio_files/DaveMusic/Kick.wav", audioCtx);
+    let clap = new soundContainer("assets/audio_files/DaveMusic/Clap01.wav", audioCtx);
+    let impact = new soundContainer("assets/audio_files/DaveMusic/Impact.wav", audioCtx);
+
+    function createMelloTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+            if(counter === 4) mello.playSequence();
+            if(counter === 8) mello.playSequence();
+            counter++;
+        }
+    }
+
+    let melloTrig = createMelloTrigger();
+
+    function createBassTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 16 ) counter = 1;
+
+            if( counter <= 4) bass.playSpecific(0);
+            if(counter === 5) bass.playSpecific(2);
+
+            if(counter >= 6 && counter <= 12 && counter % 2 === 0) bass.playSpecific(1);
+            if(counter > 9 && counter % 2 !== 0) bass.playSpecific(0)
+    
+
+            counter++;
+        }
+    }
+
+    let bassTrig = createBassTrigger();
+
+    
+    function createKickTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 4 ) counter = 1;
+            if(counter % 2 === 0) kick.play(0, random(0.8, 1.2));
+
+            counter++;
+        }
+    }
+
+    let kickTrig = createKickTrigger();
+
+    function createHHTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 4 ) counter = 1;
+            if(counter % 2 === 0) hh.playRandom(0, random(0.8, 1.2), random(0, 0.2));
+
+            counter++;
+        }
+    }
+
+    let hhTrig = createHHTrigger();
+
+    function createPercTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8 ) counter = 1;
+            if(counter % 2 === 0 && counter < 6) perc.playRandom();
+            if(counter === 7) perc.playRandom();
+            counter++;
+        }
+    }
+
+    let percTrig = createPercTrigger();
+
+    function createClapTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8 ) counter = 1;
+            if(counter % 3 === 0 && counter < 6) clap.play(0, random(0.8, 1.2), random(0, 0.2));
+            if(counter % 2 === 0 && random() < 0.9) clap.play(0, random(0.8, 1.2), random(0, 0.2));
+            counter++;
+        }
+    }
+
+    let clapTrig = createClapTrigger();
+    
+
+
+    //Added the ambience as well thought it sounded nice in the background
+    const soundAddressBirds = "assets/audio_files/Ambience/Ambience bird";
+    let birdaddresses = [];
+    for(let i = 0; i < 10; i++) birdaddresses.push(soundAddressBirds + (i +1) + ".wav");
+    const birds = createRandomizer(birdaddresses);
+    birds.setAmp(0.3);
+    let birdTimeoutID;
+
+    const wind = new soundContainer("assets/audio_files/Ambience/Wind Ambience.wav", audioCtx);
+    wind.setGain(0.5);
+    let windVoice;
+
+    //Listeners
+    const peakListeners = {
+        onHiPeakEvents: [hhTrig],
+        onLoPeakEvents: [kickTrig, melloTrig, clapTrig] 
+    }
+    
+    const nullListeners = [
+       bassTrig, hhTrig, percTrig
+    ]
+    
+    //....
+
+    //Processors
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, peakListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, nullListeners);
+
+    //Processor Array
+    const processorArr = [
+        {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
+        {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
+    ]   
+
+
+    //These need to get called in both simulator and runrecorder!!!!
+    function onActivate(){
+        windVoice = wind.play();
+        windVoice.loop = true;
+
+        function birdTrigger(){
+            birds.playRandom(0, random(0.9, 1.8));
+            birdTimeoutID = setTimeout(birdTrigger, random(3750))
+        }
+
+        birdTrigger();
+    }
+
+    function onDeactivate(){
+        windVoice.stop(0);
+        windVoice = null;
+        clearTimeout(birdTimeoutID);
+    }
+
+    //Simulator Rendering
+    function render(){
+        renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel Peaks");
+        renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2, "Vertical Accel Null Points");
+
+        alignmentChecker();
+    }
+
+    return {
+        get onActivate(){return onActivate},
+        get onDeactivate(){return onDeactivate},
+        get processors(){return processorArr},
+        get render(){return render}
+    }
+}
+
+const musicCSimulatorPreset = createMusicCSimulatorSession();
+
+MobileAppProcessors.push({
+    simulatorSession: musicCSimulatorPreset, 
+    processorArray: musicCSimulatorPreset.processors, 
+    name: "Music Style 3"
 });
 
 
