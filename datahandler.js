@@ -302,7 +302,11 @@ function createThresholdAnalyzer(){
 //left right foot
 //time between peaks
 //impact consistency (current vs average)
+//Stride distance?
 //etc...
+
+//States (State machine...)
+//Run, walk, stopped, other
 
 function createRunningAnalyzer(){
   //Right, left foot
@@ -314,7 +318,7 @@ function createRunningAnalyzer(){
   //Run State
   //Left 1,2,3,4, Right 1,2,3,4 (interpolate to find preload etc...)
 
-  //Tempo
+  //Tempo, Speed
   //Store the average peak to peak time over last X peaks
   //Can be used to calculate BPM, interpolate timing between events, sonify if running at desired pace
 

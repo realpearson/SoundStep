@@ -628,7 +628,21 @@ MobileAppProcessors.push({
 });
 
 
+//Use speed to either modulate or change music (different music for different speeds)
+//Use arpeggios for suggested running pace (DanceMakeMusic) since it is more forgiving
+//with phase and tempo missmatches
+//Music evolves during length of run
+//Long tones for intervals (jump to hear the release of the long tone otherwise it gets cut off)
 
-//CreateAsphaltSim
-//CreateGravelSim
-//CreateMusicSim
+//Running in groups with speakers, different presets
+
+//What event phase preferences do people have? (where should sounds be triggered)
+//What kind/ character of sound matches particular event phases best?
+//What kind of sounds do people prefer? (spectral and temporal qualities)
+//What kind of sounds best match certain actions (toe up, heel down, etc...)
+//What kind of sound align best temporally with actions? (ADSR, freq)
+//What temporal placement of sound feels most natural?
+
+//Animate people's run data with sound/ music to enjoy later
+//Games & Training jump on certain beats, match certain events (guitar hero) etc...
+//Screenless interaction paradigm
