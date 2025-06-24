@@ -628,6 +628,187 @@ MobileAppProcessors.push({
 });
 
 
+
+
+function createSynthTestSimulatorSession(){
+    //Setup Sounds
+    let defaultPatch = {
+        name: "",
+        voiceGain: 0.75,
+        oscWave: "triangle",
+        oscPitch: 400,
+        //get oscPitch(){return (Math.random(-1, 1)*60-30) + 200},
+        ampDecay: 0.5,//4.8,
+        lfoRate: 500,
+        lfoDepth: 200,//4000,
+        lfoWave: "square",
+        infiniteSustain: true,
+    };
+
+
+    const synth1 = createES1();
+    synth1.patch1 = defaultPatch;
+
+
+
+    function createMelloTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+            //if(counter === 4) mello.playSequence();
+            //if(counter === 8) mello.playSequence();
+            counter++;
+        }
+    }
+
+    let melloTrig = createMelloTrigger();
+
+    function createBassTrigger(){
+        let counter = 1;
+
+        return function(){
+            
+            if(counter > 16 ) counter = 1;
+
+            /*
+            if( counter <= 4) bass.playSpecific(0);
+            if(counter === 5) bass.playSpecific(2);
+
+            if(counter >= 6 && counter <= 12 && counter % 2 === 0) bass.playSpecific(1);
+            if(counter > 9 && counter % 2 !== 0) bass.playSpecific(0)
+            */
+
+            counter++;
+        }
+    }
+
+    let bassTrig = createBassTrigger();
+
+    
+    function createKickTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 4 ) counter = 1;
+            //if(counter % 2 === 0) synth1.playVoice1(audioContext.currentTime + audioContext.baseLatency);
+            if(counter % 2 === 0) synth1.applyDynamicPatchChange({oscPitch: Math.random() * 400 + 100});
+
+            counter++;
+        }
+    }
+
+    let kickTrig = createKickTrigger();
+
+    function createHHTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 4 ) counter = 1;
+            //if(counter % 2 === 0) hh.playRandom(0, random(0.8, 1.2), random(0, 0.2));
+
+            counter++;
+        }
+    }
+
+    let hhTrig = createHHTrigger();
+
+    function createPercTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8 ) counter = 1;
+            //if(counter % 2 === 0 && counter < 6) perc.playRandom();
+            //if(counter === 7) perc.playRandom();
+            counter++;
+        }
+    }
+
+    let percTrig = createPercTrigger();
+
+    function createClapTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8 ) counter = 1;
+            //if(counter % 3 === 0 && counter < 6) clap.play(0, random(0.8, 1.2), random(0, 0.2));
+            //if(counter % 2 === 0 && random() < 0.9) clap.play(0, random(0.8, 1.2), random(0, 0.2));
+            counter++;
+        }
+    }
+
+    let clapTrig = createClapTrigger();
+    
+
+
+    //Listeners
+    const peakListeners = {
+        onHiPeakEvents: [hhTrig],
+        onLoPeakEvents: [kickTrig, melloTrig, clapTrig] 
+    }
+    
+    const nullListeners = [
+       bassTrig, hhTrig, percTrig
+    ]
+    
+    //....
+
+    //Processors
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, peakListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, nullListeners);
+
+    //Processor Array
+    const processorArr = [
+        {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
+        {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
+    ]   
+
+
+    //These need to get called in both simulator and runrecorder!!!!
+    function onActivate(){
+        synth1.playVoice1(audioContext.currentTime + audioContext.baseLatency)
+    }
+
+    function onDeactivate(){
+        synth1.stop();
+    }
+
+    //Simulator Rendering
+    function render(){
+        renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel Peaks");
+        renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2, "Vertical Accel Null Points");
+
+        alignmentChecker();
+    }
+
+    return {
+        get onActivate(){return onActivate},
+        get onDeactivate(){return onDeactivate},
+        get processors(){return processorArr},
+        get render(){return render}
+    }
+}
+
+const synthTestSimulatorPreset = createSynthTestSimulatorSession();
+
+MobileAppProcessors.push({
+    simulatorSession: synthTestSimulatorPreset, 
+    processorArray: synthTestSimulatorPreset.processors, 
+    name: "Synth Test"
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 //Use speed to either modulate or change music (different music for different speeds)
 //Use arpeggios for suggested running pace (DanceMakeMusic) since it is more forgiving
 //with phase and tempo missmatches

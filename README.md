@@ -20,6 +20,8 @@ Soundstep has two UI interafaces. The smartphone interface is for realtime data 
     2. Dance (various styles)
 - Use Hz from sensor API get more accurate timestamps
 - Adjust sandbox playback to schedule audio events for more fidelity
+- Timing using data timestamps rather than average FPS
+- Sanbox events rendered as colored lines
 - UX/ UI:
     1. User mode choices
     2. Presets

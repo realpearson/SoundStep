@@ -1,6 +1,6 @@
 //Store session patches, add to dropdown to select a patch
 const patches = [];
-//const mySynth = createES1();
+const mySynth = createES1();
 
 
 
@@ -54,8 +54,6 @@ window.addEventListener("mousedown", ()=> {
   //mySynth.playVoice1(audioContext.currentTime + audioContext.baseLatency);
 });
 
-/*
 window.addEventListener("keydown", (_e) => {
 
 })
-*/

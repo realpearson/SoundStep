@@ -290,7 +290,26 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
   }
 }
 
-function createThresholdAnalyzer(){
+function createTempoAnalyzer(settings, listeners){
+  //Output:
+  //time since last step
+  //avg time over last X steps
+  //avg time total
+  //estimated BPM last, X steps, total
+
+  //Pause function for when RUN_STATE changes (STOPPED, OTHER), timeout thresh in settings...
+}
+
+function createRunningFootAnalyzer(settings, listeners){
+  //Output: FOOT_STATES
+}
+
+function createRunWalkAnalyzer(settings, listeners){
+  //Output: RUN_STATES
+  //Detect if there is no flight stage? Generation/ loading response thresholds?
+}
+
+function createThresholdAnalyzer(settings, listeners){
   //-Basic thresholds
   //threshold enter, stay, exit events
 }
@@ -308,28 +327,104 @@ function createThresholdAnalyzer(){
 //States (State machine...)
 //Run, walk, stopped, other
 
-function createRunningAnalyzer(){
-  //Right, left foot
-  //time between steps
-  //flight time
-  //impact consistency (current vs average)
-  //...
 
-  //Run State
-  //Left 1,2,3,4, Right 1,2,3,4 (interpolate to find preload etc...)
+//Right, left foot
+//time between steps
+//flight time
+//impact consistency (current vs average)
+//...
 
-  //Tempo, Speed
-  //Store the average peak to peak time over last X peaks
-  //Can be used to calculate BPM, interpolate timing between events, sonify if running at desired pace
+//Run State
+//Left 1,2,3,4, Right 1,2,3,4 (interpolate to find preload etc...)
 
-  //Variable Settings
-  //By analyzing impact forces over last X frames we can adjust analyzer settings & presets
-  //Also good for predicting next event before it happens
+//Tempo, Speed
+//Store the average peak to peak time over last X peaks
+//Can be used to calculate BPM, interpolate timing between events, sonify if running at desired pace
 
-  //Micro ML
-  //Can we create extremely small local models for simple event prediction?
-  //Can learn in realtime by comparing predictions to actual sensor results
+//Variable Settings
+//By analyzing impact forces over last X frames we can adjust analyzer settings & presets
+//Also good for predicting next event before it happens
+
+//Micro ML
+//Can we create extremely small local models for simple event prediction?
+//Can learn in realtime by comparing predictions to actual sensor results
+
+const RUN_STATES = {
+  STOPPED: "stopped",
+  WALKING: "walking",
+  RUNNING: "running", // jog, run, sprint
+  DEFAULT: "default" //default or unrecognized state
 }
+
+const FOOT_STATES = {
+  LEFT_FOOT: "leftFoot",
+  RIGHT_FOOT: "rightFoot",
+  DEFAULT: "default" //No foot state detected
+}
+
+const RUN_GAIT_STATES = {
+  //Midstance > Toe Off
+  GENERATION: "generation",
+  //Toe Off > Max Vertical Displacement
+  FLIGHT_UP: "flightUP",
+  //Max Vertical Displacement > Max Loading Response
+  FLIGHT_DOWN: "flightDown",
+  //Max Loading Response > Midstance (transition to other foot)
+  LOADING_RESPONSE: "loadingResponse",
+  DEFAULT: "default"
+
+}
+
+const WALK_GAIT_STATES = {}
+
+function createInitialRunningAnalyzerData(){
+  return {
+    runState: RUN_STATES.DEFAULT,
+    footState: FOOT_STATES.DEFAULT,
+    gaitState: RUN_GAIT_STATES.DEFAULT,
+    totalTime: 0,
+    runTime: 0,
+    totalSteps: 0,
+    leftSteps: 0,
+    rightSteps: 0,
+  }
+}
+
+function createRunningAnalyzer(){
+  //######Outline########//
+
+  //Necessary Low Level Analyzers
+  //--Required for basic functionality--//
+
+  //Optional Low Level Analyzers
+  //--For extra modulation or events--//
+
+  //Hybrid State Logic & Analyzers
+  //--High level analysis that cannot be performed by a single low level analyzer alone--//
+  //runSteps = onPeakEvent && RUN_STATE.RUNNING : increment
+  //leftSteps = onPeakEvent && RUN_STATE.RUNNING && FOOT_STATES.LEFT_FOOT
+
+  //High Level Listeners
+  //--Triggered by high level state changes--//
+
+  //Low Level Listeners
+  //--Triggered by low level state changes--//
+
+  //######End Outline########//
+
+
+
+  const runningData = createInitialRunningAnalyzerData();
+
+
+  const peakAnalyzer = createPeakAnalyzer();
+
+
+}
+
+//Pass high & low level states down
+//Optional analysers
+//Activity Analyser (Run, walk, dance, etc...) -> Mapping -> Sound/ Music
 
 
 //Peak frequency analyzer, other data, time between steps etc...

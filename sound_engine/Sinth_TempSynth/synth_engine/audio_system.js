@@ -52,7 +52,7 @@ function createVoiceHandler(_voice, _polyphony, _stealMode){
 }
 
 function loadAudioModule(_context){
-  _context.audioWorklet.addModule('sound_engine/audio_processors.js').then(() => {
+  _context.audioWorklet.addModule('synth_engine/audio_processors.js').then(() => {
     modulesLoaded = true;
     //WE could add all the initializer functions here
   });

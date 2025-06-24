@@ -82,7 +82,7 @@ function ES1_Voice(time, _patch) {
     }
   }
 
-  
+  setupModWave(_patch.lfoWave);
 
 
   const oscMod = new OscillatorNode(audioContext, {
@@ -95,8 +95,6 @@ function ES1_Voice(time, _patch) {
   let noiseRate = noiseMod.parameters.get("rate");
   //noiseMod.start();
   
-
-  setupModWave(_patch.lfoWave);
 
 
   function setupEnv(){
@@ -152,9 +150,8 @@ function ES1_Voice(time, _patch) {
 //-lfo freq
 
   function applyDynamicPatchChange(_newVals){
-    console.log("dyn mod");
     if(_newVals.oscWave) osc.type = _newVals.oscWave;
-    if(_newVals.oscPitch) osc.frequency.setValueAtTime(_newVals.oscPitch, audioContext.currentTime);
+    if(_newVals.oscPitch) osc.frequency = _newVals.oscPitch;
     if(_newVals.voiceGain) master.gain = _newVals.voiceGain;
     if(_newVals.lfoDepth) modAmt.gain = _newVals.lfoDepth;
     if(_newVals.lfoWave || _newVals.lfoRate != undefined) {
