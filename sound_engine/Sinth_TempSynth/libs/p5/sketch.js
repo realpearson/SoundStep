@@ -85,13 +85,13 @@ function setup(){
   oscWave.useIMG(['libs/temp_assets/sin.png', 'libs/temp_assets/tri.png', 'libs/temp_assets/sqr.png', 'libs/temp_assets/saw.png']);
   
   oscWave.addListener("ongroupchange", () => {
-    userPatch.oscWave = ES1_OSC_TYPES[Object.keys(ES1_OSC_TYPES)[oscWave.getVal()]]
+    userPatch.oscWave = Object.values(ES1_OSC_TYPES)[oscWave.getVal()];
   });
   
   lfoWave = new buttonGroup({posX: 5, posY: 250, size: 20, layout: "horizontal", numButtons: 7});
   lfoWave.useIMG(['libs/temp_assets/sin.png', 'libs/temp_assets/tri.png', 'libs/temp_assets/sqr.png', 'libs/temp_assets/saw.png', 'libs/temp_assets/sandh.png', 'libs/temp_assets/noise.png', 'libs/temp_assets/env.png'])
   lfoWave.addListener("ongroupchange", () => {
-    userPatch.lfoWave = ES1_LFO_TYPES[Object.keys(ES1_LFO_TYPES)[lfoWave.getVal()]]
+    userPatch.lfoWave = Object.values(ES1_LFO_TYPES)[lfoWave.getVal()];
   });
   
   loadPatch(userPatch);
@@ -130,11 +130,12 @@ function mousePressed(){
   faders.forEach((fader) => {fader.collisionCheck({x: mouseX, y: mouseY})});
 }
 
-let voiceOn = false;
+//let voiceOn = false;
 function keyPressed(){
-  if(voiceOn) mySynth.stop();
-  else mySynth.playVoice1(audioContext.currentTime + audioContext.baseLatency);
-  voiceOn = !voiceOn;
+  //if(voiceOn) mySynth.stop();
+  //else mySynth.playVoice1(audioContext.currentTime + audioContext.baseLatency);
+  mySynth.playVoice1(audioContext.currentTime); // + audioContext.baseLatency);
+  //voiceOn = !voiceOn;
 }
 
 function mouseReleased(){
@@ -157,8 +158,8 @@ function savePatch(){
     listEmpty = false;
     patchSelect.reset();
   }
+  userPatch.name = patchName.getVal();
   const patch = {...userPatch};
-  patch.name = patchName.getVal();
   patches.push(patch);
   patchSelect.addOption(patch.name);
   patchSelect.setVal(patch.name);

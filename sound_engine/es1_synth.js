@@ -85,10 +85,7 @@ function ES1_Voice(time, _patch) {
   
 
 
-  const oscMod = new OscillatorNode(audioContext, {
-      type: _patch.lfoWave,
-      frequency: _patch.lfoRate
-  });
+  const oscMod = new OscillatorNode(audioContext);
   oscMod.start();
 
   const noiseMod = new AudioWorkletNode(audioContext, 'sample-hold-gen'); //For dynamic control instantiate regardless if in patch
@@ -111,18 +108,22 @@ function ES1_Voice(time, _patch) {
       frequency: _patch.lfoRate
     });
     */
+   osc.frequency.setValueAtTime(_patch.oscPitch, audioContext.currentTime);
    modulator?.disconnect();
    modulator = oscMod;
+   modulator.frequency.value = _patch.lfoRate;
+   modulator.type = _patch.lfoWave;
    modulator.connect(modAmt);
   }
   
   function setupNoiseMod(){
     //CREATE WRAPPER FOR CUSTOM WORKLET PROCESSORS W/ relevant functions, release, etc...
     //modulator = new AudioWorkletNode(audioContext, 'sample-hold-gen'); //{processorOptions: {interval: "random", interpolate: true}}
+    osc.frequency.setValueAtTime(_patch.oscPitch, audioContext.currentTime);
     modulator?.disconnect();
     modulator = noiseMod;
     if(_patch.lfoWave === ES1_LFO_TYPES.NOISE) modulator.port.postMessage({interpolate: true});
-    else modulator.port.postMessage({interpolate: true})
+    else modulator.port.postMessage({interpolate: false})
     noiseRate.value = _patch.lfoRate;
     modulator.connect(modAmt);
   }
@@ -152,11 +153,10 @@ function ES1_Voice(time, _patch) {
 //-lfo freq
 
   function applyDynamicPatchChange(_newVals){
-    console.log("dyn mod");
     if(_newVals.oscWave) osc.type = _newVals.oscWave;
     if(_newVals.oscPitch) osc.frequency.setValueAtTime(_newVals.oscPitch, audioContext.currentTime);
-    if(_newVals.voiceGain) master.gain = _newVals.voiceGain;
-    if(_newVals.lfoDepth) modAmt.gain = _newVals.lfoDepth;
+    if(_newVals.voiceGain) master.gain.value = _newVals.voiceGain;
+    if(_newVals.lfoDepth) modAmt.gain.value = _newVals.lfoDepth;
     if(_newVals.lfoWave || _newVals.lfoRate != undefined) {
       _patch.lfoRate = _newVals.lfoRate ?? _patch.lfoRate;
       setupModWave(_newVals.lfoWave);
@@ -170,7 +170,7 @@ function ES1_Voice(time, _patch) {
   
   function stop(){
     //A little extra work to prevent pops and clicks
-    const stopTime = audioContext.currentTime + audioContext.baseLatency;
+    const stopTime = audioContext.currentTime;// + audioContext.baseLatency;
     master.gain.exponentialRampToValueAtTime(0.0001, stopTime + 0.01);
     osc.stop(stopTime + 0.011);
     done = true;

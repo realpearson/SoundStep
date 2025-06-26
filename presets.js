@@ -634,7 +634,7 @@ function createSynthTestSimulatorSession(){
     //Setup Sounds
     let defaultPatch = {
         name: "",
-        voiceGain: 0.75,
+        voiceGain: 0.05,
         oscWave: "triangle",
         oscPitch: 400,
         //get oscPitch(){return (Math.random(-1, 1)*60-30) + 200},
@@ -649,6 +649,21 @@ function createSynthTestSimulatorSession(){
     const synth1 = createES1();
     synth1.patch1 = defaultPatch;
 
+
+    const kick = {
+        name:"HardKick",
+        voiceGain:0.75,
+        oscWave:"triangle",
+        oscPitch:323.6378752092112,
+        ampDecay:0.8999999999999999,
+        lfoRate:2.671967427856469,
+        lfoDepth:200,
+        lfoWave:"envelope",
+        infiniteSustain:false
+    }
+
+    const kickSynth = createES1();
+    kickSynth.patch1 = kick;
 
 
     function createMelloTrigger(){
@@ -692,7 +707,8 @@ function createSynthTestSimulatorSession(){
         return function(){
             if(counter > 4 ) counter = 1;
             //if(counter % 2 === 0) synth1.playVoice1(audioContext.currentTime + audioContext.baseLatency);
-            if(counter % 2 === 0) synth1.applyDynamicPatchChange({oscPitch: Math.random() * 400 + 100});
+            //if(counter % 2 === 0) synth1.applyDynamicPatchChange({oscPitch: Math.random() * 400 + 100});
+            kickSynth.playVoice1(audioContext.currentTime);
 
             counter++;
         }
@@ -705,7 +721,10 @@ function createSynthTestSimulatorSession(){
 
         return function(){
             if(counter > 4 ) counter = 1;
-            //if(counter % 2 === 0) hh.playRandom(0, random(0.8, 1.2), random(0, 0.2));
+            if(counter % 2 === 0) {
+                const wave = Object.values(ES1_LFO_TYPES)[Math.floor(Math.random()*Object.values(ES1_LFO_TYPES).length)];
+                synth1.applyDynamicPatchChange({lfoWave: wave});
+            }
 
             counter++;
         }
@@ -766,7 +785,7 @@ function createSynthTestSimulatorSession(){
 
     //These need to get called in both simulator and runrecorder!!!!
     function onActivate(){
-        synth1.playVoice1(audioContext.currentTime + audioContext.baseLatency)
+        synth1.playVoice1(audioContext.currentTime);
     }
 
     function onDeactivate(){

@@ -126,9 +126,10 @@ function createSimulator(data){
   let active = false;
   let inc = 0;
   let timeOffsetAccumulator = 0;
-  let dataFrameLen = calcDataFR();
+  let dataFrameLen = deltaTime;//calcDataFR();
   const discrepencyThreshold = 2;
 
+  /*
   function calcDataFR(){
     let totMillis = 0;
     for(let i = 1; i < data.session.length; i++){
@@ -136,6 +137,7 @@ function createSimulator(data){
     }    
     return (totMillis / data.session.length-1);
   }
+  */
 
 
   function increment(debug){
@@ -164,6 +166,8 @@ function createSimulator(data){
     processors.forEach((p) => {
       p.processor.analyzeRealtime(data.session[inc][p.sensorType][p.axis], debug);
     });
+
+    if(inc > 0) dataFrameLen = data.session[inc].timestamp - data.session[inc-1].timestamp;
 
     inc++;
   }
