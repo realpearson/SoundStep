@@ -1,5 +1,4 @@
-const MobileAppProcessors = [];
-
+window.MobileAppProcessors = window.MobileAppProcessors || [];
 
 
 function createAsphaltSimulatorSession(){
