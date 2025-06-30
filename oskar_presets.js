@@ -214,9 +214,9 @@ function createCollabMusicSimulatorSession(){
 
     //
     
-    const nullListeners = [ 
+    const nullListeners = [ () => bleeps.playRandom(0, random(1, 1.1), random(0.1))
     ]
-    //() => bleeps.playRandom(0, random(1, 1.1), random(0.1))
+    //
     //....
 
     //Processors
