@@ -68,11 +68,16 @@ function draw() {
     text(rotationY, 10, 430);
     text(rotationZ, 10, 460);
     
+    /*
     push();
-    translate(width-75, height/2 - 25);
+    rotate(-PI);
+    translate(50, height/2 - 25);
     fill(255)
-    triangle(0, 0, 50, 25, 0, 50);
+    //triangle(0, 0, 50, 25, 0, 50);
+    text("This Way Up", 0, 0);
     pop();
+    */
+    
 
     stroke(245);
     strokeWeight(4);

@@ -12,6 +12,18 @@ const loadSoundData = (_address, _ctxt, _sound) => {
   request.send();
 }
 
+//We need to know what modulation destinations there are
+//We need to provide a way of connecting a modulator to those source
+
+/**
+ * SOURCE
+ * -playbackRate
+ * -detune
+ * 
+ * AMP
+ * -gain
+ */
+
 
 let soundContainer = function (_address, _ctxt) {
   let address = _address;
@@ -19,6 +31,7 @@ let soundContainer = function (_address, _ctxt) {
   let buffer = null;
   let gain = 1;
   let node;
+  
   
   loadSoundData(address, ctxt, this);
   
@@ -50,6 +63,122 @@ let soundContainer = function (_address, _ctxt) {
     gain = _gain;
   }
 }
+
+
+
+
+
+//NEW AUDIO LOADER/ SOURCE DEAL
+async function loadAudioData(sound, fileAddress, context){
+  try {
+    const response = await fetch(fileAddress);
+    context.decodeAudioData(await response.arrayBuffer(), (arrayBuffer) => sound.setBuffer(arrayBuffer));
+    console.log("loaded");
+  } catch(err) {
+    console.error("Audio load error: " + err.message);
+  }
+}
+
+
+/*Using Multisound
+
+let mySound;
+let ampMod;
+let pMod;
+
+mySound = new monoSound("assets/PadLoop.wav", audioCtx, {loop:true});
+ampMod = new MultiEnv(audioCtx);
+pMod = new MultiEnv(audioCtx);
+
+pMod.addStep({time: 0, val: 1}); //Initial value
+pMod.addStep({time: 0.2, val: 2, sustain: true});
+pMod.addStep({time: 0.5, val: 0.5, sustain:true});
+mySound.setPitchMod(pMod);
+
+//Play Sound
+mySound.play();
+
+//Trigger Envelope
+pMod.trigger();
+
+*/
+
+let MonoSound = function (address, ctxt, settings) {
+
+  //Nodes
+  const amp = new GainNode(ctxt);
+  amp.connect(ctxt.destination);
+  let ampModulator = settings?.ampModulator || null;
+  let pitchModulator = settings?.pitchModulator || null;
+
+  //Source Settings
+  const currentSources = []
+  let buffer;
+  loadAudioData(this, address, ctxt);
+  let loop = settings?.loop || false;
+
+  
+  this.play = (time, speed, offset) => {
+    if(currentSources.length > 0) currentSources[currentSources.length-1].stop();
+    
+    const source = ctxt.createBufferSource();
+    source.buffer = buffer;
+
+    time = time || 0;
+    speed = speed || 1;
+    source.playbackRate.value = speed;
+    source.loop = loop;
+    if(pitchModulator) pitchModulator.connect(source.playbackRate);
+    source.connect(amp);
+
+    source.start(ctxt.currentTime + time, source.buffer.duration * (offset||0));
+    //if(ampModulator) ampModulator.trigger(ctxt.currentTime + time);
+    //if(pitchModulator) pitchModulator.trigger(ctxt.currentTime + time);
+
+    
+    source.onended = () => {cleanUpSource(source)};
+    currentSources.push(source);
+  }
+
+  function cleanUpSource(source){
+    source.disconnect();
+    if(pitchModulator) pitchModulator.disconnect();
+    currentSources.forEach((s, ind) => {
+      if(s === source) currentSources.splice(ind, 1);
+    });
+    //console.log(currentSources.length);
+  }
+
+  this.stop = (time) => {
+    currentSources.forEach((s) => {
+      s.stop((time ?? 0) + ctxt.currentTime);
+    });
+  }
+  
+  this.connect = (node) => {
+    if(node != undefined && node.hasOwnProperty('input')) gainNode.connect(node);
+    else throw Error('Not a valid node');
+  }
+  
+  this.setBuffer = (data) => {
+    console.log(data.length)
+    buffer = data;
+  }
+
+  this.setGain = (gain) => {
+    amp.gain.value = gain;
+  }
+
+  this.setGainMod = (mod) => {
+    ampModulator = mod;
+    ampModulator.connect(amp.gain);
+  }
+
+  this.setPitchMod = (mod) => {
+    pitchModulator = mod;
+  }
+}
+
 
 
 function createRandomizer(sounds){
@@ -88,31 +217,9 @@ function createRandomizer(sounds){
   }
 }
 
-/*
-//NEW AUDIO LOADER/ SOURCE DEAL
-async function loadAudioData(buffer, fileAddress, context){
-  try {
-    const response = await fetch(fileAddress);
-    buffer = await context.decodeAudioData(await response.arrayBuffer());
-  } catch(err) {
-    console.error("Audio load error: " + err.message);
-  }
-}
 
-function createBufferList(){
-  const buffers = [];
-  
-  return {
-    get addBuffer()
-  }
-}
 
-function createVoice(buffer, context){
-  return {
 
-  }
-}
-  */
 
 
 

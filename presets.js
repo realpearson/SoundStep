@@ -1,6 +1,6 @@
-MobileAppProcessors = [];
 
-
+////////////////////////////////////////////////////////////////////////////////
+/*
 function createAsphaltSimulatorSession(){
     //Setup Sounds
     const soundAddress = "assets/audio_files/Footsteps/Footstep asphalt ";
@@ -89,6 +89,9 @@ MobileAppProcessors.push({
     processorArray: asphaltSimulatorPreset.processors, 
     name: "Asphalt"
 });
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 function createGravelSimulatorSession(){
@@ -182,6 +185,9 @@ MobileAppProcessors.push({
     processorArray: gravelSimulatorPreset.processors, 
     name: "Gravel"
 });
+
+*/
+////////////////////////////////////////////////////////////////////////////////
 
 
 function createMusicASimulatorSession(){
@@ -283,7 +289,10 @@ MobileAppProcessors.push({
     name: "Music Style 1"
 });
 
-//The new music preset, havent changed the name though
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 function createMusicBSimulatorSession(){
     //Setup Sounds
 
@@ -422,7 +431,7 @@ MobileAppProcessors.push({
     name: "Music Style 2"
 });
 
-
+////////////////////////////////////////////////////////////////////////////////
 
 function createMusicCSimulatorSession(){
     //Setup Sounds
@@ -627,7 +636,7 @@ MobileAppProcessors.push({
 });
 
 
-
+////////////////////////////////////////////////////////////////////////////////
 
 function createSynthTestSimulatorSession(){
     //Setup Sounds
@@ -639,7 +648,7 @@ function createSynthTestSimulatorSession(){
         //get oscPitch(){return (Math.random(-1, 1)*60-30) + 200},
         ampDecay: 0.5,//4.8,
         lfoRate: 500,
-        lfoDepth: 200,//4000,
+        lfoDepth: 0,//4000,
         lfoWave: "square",
         infiniteSustain: true,
     };
@@ -665,39 +674,8 @@ function createSynthTestSimulatorSession(){
     kickSynth.patch1 = kick;
 
 
-    function createMelloTrigger(){
-        let counter = 1;
 
-        return function(){
-            if(counter > 8) counter = 1;
-            //if(counter === 4) mello.playSequence();
-            //if(counter === 8) mello.playSequence();
-            counter++;
-        }
-    }
 
-    let melloTrig = createMelloTrigger();
-
-    function createBassTrigger(){
-        let counter = 1;
-
-        return function(){
-            
-            if(counter > 16 ) counter = 1;
-
-            /*
-            if( counter <= 4) bass.playSpecific(0);
-            if(counter === 5) bass.playSpecific(2);
-
-            if(counter >= 6 && counter <= 12 && counter % 2 === 0) bass.playSpecific(1);
-            if(counter > 9 && counter % 2 !== 0) bass.playSpecific(0)
-            */
-
-            counter++;
-        }
-    }
-
-    let bassTrig = createBassTrigger();
 
     
     function createKickTrigger(){
@@ -715,59 +693,42 @@ function createSynthTestSimulatorSession(){
 
     let kickTrig = createKickTrigger();
 
-    function createHHTrigger(){
+    function createNoteGen(){
         let counter = 1;
+
+        const freks = [262, 295, 328, 349];
+        
 
         return function(){
             if(counter > 4 ) counter = 1;
             if(counter % 2 === 0) {
-                const wave = Object.values(ES1_LFO_TYPES)[Math.floor(Math.random()*Object.values(ES1_LFO_TYPES).length)];
-                synth1.applyDynamicPatchChange({lfoWave: wave});
+                let note = freks[Math.floor(Math.random() * freks.length)];
+                if(Math.random() < 0.2) note *= 2;
+                
+                synth1.applyDynamicPatchChange({oscPitch: note});
+                //const wave = Object.values(ES1_LFO_TYPES)[Math.floor(Math.random()*Object.values(ES1_LFO_TYPES).length)];
+                //synth1.applyDynamicPatchChange({lfoWave: wave});
             }
 
             counter++;
         }
     }
 
-    let hhTrig = createHHTrigger();
+    let noteTrig = createNoteGen();
 
-    function createPercTrigger(){
-        let counter = 1;
 
-        return function(){
-            if(counter > 8 ) counter = 1;
-            //if(counter % 2 === 0 && counter < 6) perc.playRandom();
-            //if(counter === 7) perc.playRandom();
-            counter++;
-        }
-    }
 
-    let percTrig = createPercTrigger();
 
-    function createClapTrigger(){
-        let counter = 1;
-
-        return function(){
-            if(counter > 8 ) counter = 1;
-            //if(counter % 3 === 0 && counter < 6) clap.play(0, random(0.8, 1.2), random(0, 0.2));
-            //if(counter % 2 === 0 && random() < 0.9) clap.play(0, random(0.8, 1.2), random(0, 0.2));
-            counter++;
-        }
-    }
-
-    let clapTrig = createClapTrigger();
     
 
 
     //Listeners
     const peakListeners = {
-        onHiPeakEvents: [hhTrig],
-        onLoPeakEvents: [kickTrig, melloTrig, clapTrig] 
+        onHiPeakEvents: [noteTrig],
+        onLoPeakEvents: [kickTrig] 
     }
     
-    const nullListeners = [
-       bassTrig, hhTrig, percTrig
-    ]
+    const nullListeners = [noteTrig]
     
     //....
 
@@ -816,11 +777,321 @@ MobileAppProcessors.push({
 });
 
 
+////////////////////////////////////////////////////////////////////////////////
+
+function createEnvTestSimulatorSession(){
+    //Setup Sounds
+
+
+    const loop1 = new MonoSound("assets/audio_files/Loops/GrainLoop.wav", audioCtx, {loop:true});
+    const ampMod = new MultiEnv(audioCtx);
+    const pitchMod = new MultiEnv(audioCtx);
+
+    pitchMod.addStep({time:0, val:1});
+    pitchMod.addStep({time:0.1, val:1.1, sustain:true});
+    pitchMod.addStep({time:0.1, val:0.9, sustain:true});
+    loop1.setPitchMod(pitchMod);
+
+    function createTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+            //if(counter === 4) mello.playSequence();
+            //if(counter === 8) mello.playSequence();
+            counter++;
+        }
+    }
+
+    function createPitchEnvTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+            //if(counter === 4) mello.playSequence();
+            //if(counter === 8) mello.playSequence();
+            pitchMod.trigger();
+            counter++;
+        }
+    }
+    const pitchEnvTrig = createPitchEnvTrigger();
+
+   
+    //Listeners
+    const peakListeners = {
+        onHiPeakEvents: [pitchEnvTrig],
+        onLoPeakEvents: [pitchEnvTrig] 
+    }
+    
+    const nullListeners = [
+       
+    ]
+    
+    //....
+
+    //Processors
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, peakListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, nullListeners);
+
+    //Processor Array
+    const processorArr = [
+        {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
+        {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
+    ]   
+
+
+    //These need to get called in both simulator and runrecorder!!!!
+    function onActivate(){
+        loop1.play();
+    }
+
+    function onDeactivate(){
+        loop1.stop();
+    }
+
+    //Simulator Rendering
+    function render(){
+        renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel Peaks");
+        renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2, "Vertical Accel Null Points");
+
+        alignmentChecker();
+    }
+
+    return {
+        get onActivate(){return onActivate},
+        get onDeactivate(){return onDeactivate},
+        get processors(){return processorArr},
+        get render(){return render}
+    }
+}
+
+const envTestSimulatorPreset = createEnvTestSimulatorSession();
+
+MobileAppProcessors.push({
+    simulatorSession: envTestSimulatorPreset, 
+    processorArray: envTestSimulatorPreset.processors, 
+    name: "Env Test"
+});
 
 
 
+////////////////////////////////////////////////////////////////////////////////
 
 
+
+function createGaitPhaseSimulatorSession(){
+    //Setup Sounds
+
+
+    const loop1 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop2 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop3 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop4 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop5 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop6 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop7 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+    const loop8 = new MonoSound("assets/audio_files/Loops/ElementEmitterLoop.wav", audioCtx, {loop:true});
+
+    const ampMod1 = new MultiEnv(audioCtx);
+    const ampMod2 = new MultiEnv(audioCtx);
+    const ampMod3 = new MultiEnv(audioCtx);
+    const ampMod4 = new MultiEnv(audioCtx);
+    const ampMod5 = new MultiEnv(audioCtx);
+    const ampMod6 = new MultiEnv(audioCtx);
+    const ampMod7 = new MultiEnv(audioCtx);
+    const ampMod8 = new MultiEnv(audioCtx);
+
+    const attack = 0.05
+    const release = 0.08
+
+
+    ampMod1.addStep({time:0, val:0.0});
+    ampMod1.addStep({time:attack, val:1.0, sustain:true});
+    ampMod1.addStep({time:release, val:0.0});
+
+    ampMod2.addStep({time:0, val:0.0});
+    ampMod2.addStep({time:attack, val:1.0, sustain:true});
+    ampMod2.addStep({time:release, val:0.0});
+
+    ampMod3.addStep({time:0, val:0.0});
+    ampMod3.addStep({time:attack, val:1.0, sustain:true});
+    ampMod3.addStep({time:release, val:0.0});
+
+    ampMod4.addStep({time:0, val:0.0});
+    ampMod4.addStep({time:attack, val:1.0, sustain:true});
+    ampMod4.addStep({time:release, val:0.0});
+
+    ampMod5.addStep({time:0, val:0.0});
+    ampMod5.addStep({time:attack, val:1.0, sustain:true});
+    ampMod5.addStep({time:release, val:0.0});
+
+    ampMod6.addStep({time:0, val:0.0});
+    ampMod6.addStep({time:attack, val:1.0, sustain:true});
+    ampMod6.addStep({time:release, val:0.0});
+
+    ampMod7.addStep({time:0, val:0.0});
+    ampMod7.addStep({time:attack, val:1.0, sustain:true});
+    ampMod7.addStep({time:release, val:0.0});
+
+    ampMod8.addStep({time:0, val:0.0});
+    ampMod8.addStep({time:attack, val:1.0, sustain:true});
+    ampMod8.addStep({time:release, val:0.0});
+
+    loop1.setGainMod(ampMod1);
+    loop2.setGainMod(ampMod2);
+    loop3.setGainMod(ampMod3);
+    loop4.setGainMod(ampMod4);
+    loop5.setGainMod(ampMod5);
+    loop6.setGainMod(ampMod6);
+    loop7.setGainMod(ampMod7);
+    loop8.setGainMod(ampMod8);
+
+    function createTrigger(){
+        let counter = 1;
+
+        return function(){
+            if(counter > 8) counter = 1;
+            //if(counter === 4) mello.playSequence();
+            //if(counter === 8) mello.playSequence();
+            counter++;
+        }
+    }
+
+    function createAmpEnvTrigger(){
+        let counter = 1;
+        let first = true;
+
+        return function(){
+            if(counter > 8) counter = 1;
+
+            if(counter === 1 || counter === 2){
+                ampMod1.trigger();
+                //console.log(counter);
+            }
+            if(counter === 2 || counter === 3){
+                ampMod2.trigger();
+                //console.log(counter);
+            }
+            if(counter === 3 || counter === 4){
+                ampMod3.trigger();
+                //console.log(counter);
+            }
+            if(counter === 4 || counter === 5){
+                ampMod4.trigger();
+                //console.log(counter);
+            }
+            if(counter === 5 || counter === 6){
+                ampMod5.trigger();
+                //console.log(counter);
+            }
+            if(counter === 6 || counter === 7){
+                ampMod6.trigger();
+                //console.log(counter);
+            }
+            if(counter === 7 || counter === 8){
+                ampMod7.trigger();
+                //console.log(counter);
+            }
+            if(counter === 8 || counter === 1){
+                if(counter === 8){
+                    first = false;
+                    console.log("counter");
+                } 
+
+                if(!first) ampMod8.trigger();
+                
+            }
+            
+            counter++;
+        }
+    }
+    const ampEnvTrig = createAmpEnvTrigger();
+
+
+   
+    //Listeners
+    const peakListeners = {
+        onHiPeakEvents: [ampEnvTrig],
+        onLoPeakEvents: [ampEnvTrig] 
+    }
+    
+    const nullListeners = [ampEnvTrig];
+    
+    //....
+
+    //Processors
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, peakListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, nullListeners);
+
+    //Processor Array
+    const processorArr = [
+        {processor: peakXProcessor, sensorType: "acceleration", axis: "x"},
+        {processor: zeroXingProcessor, sensorType: "acceleration", axis: "x"}
+    ]   
+
+
+    //These need to get called in both simulator and runrecorder!!!!
+    function onActivate(){
+        loop1.play(0,1);
+        loop2.play(0,1.1);
+        loop3.play(0,1.2);
+        loop4.play(0,1.3);
+        loop5.play(0,1.4);
+        loop6.play(0,1.5);
+        loop7.play(0,1.6);
+        loop8.play(0,1.7);
+        ampMod1.trigger();
+        ampMod2.trigger();
+        ampMod3.trigger();
+        ampMod4.trigger();
+        ampMod5.trigger();
+        ampMod6.trigger();
+        ampMod7.trigger();
+        ampMod8.trigger();
+        ampMod1.trigger();
+        ampMod2.trigger();
+        ampMod3.trigger();
+        ampMod4.trigger();
+        ampMod5.trigger();
+        ampMod6.trigger();
+        ampMod7.trigger();
+        ampMod8.trigger();
+    }
+
+    function onDeactivate(){
+        loop1.stop();
+        loop2.stop();
+        loop3.stop();
+        loop4.stop();
+        loop5.stop();
+        loop6.stop();
+        loop7.stop();
+        loop8.stop();
+    }
+
+    //Simulator Rendering
+    function render(){
+        renderDataCurve(peakXProcessor.data, 0.5, 60, "Vertical Accel Peaks");
+        renderDataCurve(zeroXingProcessor.data, 0.5, 60 + laneSpacing * 2, "Vertical Accel Null Points");
+
+        alignmentChecker();
+    }
+
+    return {
+        get onActivate(){return onActivate},
+        get onDeactivate(){return onDeactivate},
+        get processors(){return processorArr},
+        get render(){return render}
+    }
+}
+
+const gaitPhaseSimulatorPreset = createGaitPhaseSimulatorSession();
+
+MobileAppProcessors.push({
+    simulatorSession: gaitPhaseSimulatorPreset, 
+    processorArray: gaitPhaseSimulatorPreset.processors, 
+    name: "Gait Phase"
+});
 
 
 
@@ -842,6 +1113,14 @@ MobileAppProcessors.push({
 //What kind of sound align best temporally with actions? (ADSR, freq)
 //What temporal placement of sound feels most natural?
 
+//Dance
+//What mappings trigger certain actions, most satisfying. (jump mapped to swish sound)
+
 //Animate people's run data with sound/ music to enjoy later
 //Games & Training jump on certain beats, match certain events (guitar hero) etc...
 //Screenless interaction paradigm
+
+
+//Robertp
+//-Håkan Libdo sound bar
+//-Hassan Lindetorp

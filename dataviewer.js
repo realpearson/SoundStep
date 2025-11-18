@@ -73,7 +73,7 @@ async function fetchLocalData(event){
     simulator = createSimulator(data);
 
     //Dont hard code this...
-    simulator.loadPreset(asphaltSimulatorPreset);
+    simulator.loadPreset(asphaltWithAmbienceSession);
     simulator.setDataPos(500);
   }
 }
