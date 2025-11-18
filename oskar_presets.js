@@ -1,6 +1,6 @@
 
 
-/*
+
 
 function createReactorSimulatorSession(){
     //Setup Sounds
@@ -74,7 +74,7 @@ window.MobileAppProcessors.push({
     name: "Nuclear reactor"
 });
 
-*/
+
 
 function createCollabMusicSimulatorSession1(){
     //Setup Sounds

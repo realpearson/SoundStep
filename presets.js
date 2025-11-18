@@ -1,6 +1,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
-/*
+
 function createAsphaltSimulatorSession(){
     //Setup Sounds
     const soundAddress = "assets/audio_files/Footsteps/Footstep asphalt ";
@@ -186,7 +186,7 @@ MobileAppProcessors.push({
     name: "Gravel"
 });
 
-*/
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
