@@ -51,7 +51,8 @@ function draw() {
     //Make all this pg or something...
     background(29);
     //image(logo, -65, 0);
-    recordData();
+    //recordData();
+    if(currentSession) currentSession.recordData();
     
     noFill();
     stroke(29)

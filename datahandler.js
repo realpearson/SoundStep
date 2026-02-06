@@ -3,48 +3,192 @@
 //Press record-> Create session, create global data, create raw data, map to processing buffers
 
 
-function createSession(name){
+const LOW_LEVEL_PROCESSOR_TYPES = {
+  PEAK_DETECTION: "peak_detection",
+  ZERO_CROSSING_DETECTION: "zero_crossing_detection",
+  FOOT_SIDE_DETECTION: "foot_side_detection",
+  RANGE_DETECTION: "range_detection",
+
+}
+
+const ACCELERATION_PROCESSOR_TYPES = {
+  PEAK: "PEAK",
+  ZERO_CROSSING: "ZERO_CROSSING"
+}
+
+const AXIS = {
+  X: "X",
+  Y: "Y",
+  Z: "Z"
+}
+
+/**
+ * Situation
+ * 
+ * peak detected at index 5
+ * 
+ * we want foot side state at index 5
+ * 
+ * footSideData = currentSession.querryIndex(index, PROC_TYPES.FOOT_SIDE);
+ * console.log(footSideData.footState)
+ * 
+ * get time between right foot steps =
+ * currenSession.querryIndex(footSideData.indexOfRightFootDown(0)).timestamp - currenSession.querryIndex(footSideData.indexOfRightFootDown(-1)).timestamp
+ * 
+ * Getting raw data from currentSession by index: sensor data, timestamps
+ * 
+ * Getting processed data from currentSession, get processor ref, access data by index
+ *
+ */
+
+const HIGH_LEVEL_PROCESSOR_TYPES = {
+  BPM_DETECTION: "bpm_detection",
+
+}
+
+//Helper for data filtering
+function getNestedKeys(obj, keys){
+  let val = obj[keys[0]];
+  for(let i = 1; i < keys.length; i++) val = val[keys[i]];
+  return val;
+}
+
+function createSession(params){
   let globalData = null;
   
+  //lowLevelProcessors only accept raw sensor data.
+  const accelerationProcessors = {
+    [ACCELERATION_PROCESSOR_TYPES.PEAK]: {
+      [AXIS.X]: null,
+      [AXIS.Y]: null,
+      [AXIS.Z]: null,
+    },
+    [ACCELERATION_PROCESSOR_TYPES.ZERO_CROSSING] : {
+      [AXIS.X]: null,
+      [AXIS.Y]: null,
+      [AXIS.Z]: null,
+    }
+  }
+
+  function checkAccelProcType(type, axis){
+    if(!Object.keys(ACCELERATION_PROCESSOR_TYPES).includes(type)){
+      console.warn("No processor of type: " + type);
+      return;
+    }
+    if(!Object.keys(AXIS).includes(axis)){
+      console.warn(axis + " is not a valid axis");
+      return;
+    }
+    return true;
+  }
+
+  function connectAccelerationProcessor(processor, type, axis){
+    if(! checkAccelProcType(type, axis)) return;
+    accelerationProcessors[type][axis] = processor;
+    const dataFilter = ["acceleration", axis];
+    processor.setupProcessor(session, dataFilter, sessionData);
+  }
+
+  function getAccelerationProcessor(type, axis){
+    if(! checkAccelProcType(type, axis)) return;
+    return accelerationProcessors.get(type).get(axis);
+  }
+
+  function updateAccelerationProcessors(){
+    Object.keys(accelerationProcessors).forEach((type) => {
+      Object.keys(accelerationProcessors[type]).forEach((axis) => {
+        if(accelerationProcessors[type][axis]) {
+          accelerationProcessors[type][axis].analyzeRealtime();
+        }
+      })
+    });
+  }
+
+  /* CHANGE TO ABOVE
+  const rotationProcessors = new Map();
+
+  function connectRotationProcessor(){}
+  function getRotationProcessor(){}
+  function updateRotationProcessors(){}
+  */
+
+
+  //sessionData only stores raw sensor data
   const sessionData = [];
-  const processors = [];
+  //currentIndex is the 'master clock' and allows algorithms to cross correlate
+  //between data arrays. Some algorithms have latency and need to reference
+  //previous data indexes. Event callbacks use indexes to reference relevant data
+  //rather than receiving data.
+  let currentIndex = 0;
+  let upstreamData = [];
+
+
+  function createMockSinData(){
+    let theta = ((Math.random()-0.5) * 2) * Math.PI;
+    return function(){
+      theta += 0.4;
+      return Math.sin(theta) * 40;
+    }
+  }
+
+  const mockX = createMockSinData();
+  const mockY = createMockSinData();
+  const mockZ = createMockSinData();
+
   
-  function recordData(data, debug){
+  function recordData(){
+
+    const timestamp = performance.now();
     
     if(globalData === null) {
-      globalData = {sessionName: name||'', 
-                    date: Date.now(), 
-                    t0: performance.now(), 
-                    audioOutputLatency: audioCtx.outputLatency,
-                   }
+      globalData = {
+        sessionName: params?.name||'',
+        //Experiment data, participant id, condition, etc...
+        date: Date.now(), 
+        //t0: timestamp, 
+        audioOutputLatency: audioCtx.outputLatency, 
+      }
     }
 
+    const data = {
+      timestamp,
+      index: currentIndex, //Makes it quick to cross corralate between data sets
+      //GET SENSOR DATA W/O P5 VARS!
+      /*
+      acceleration: {x:accelerationX, y:accelerationY, z:accelerationZ},
+      rotation: {x:rotationX, y:rotationY, z:rotationZ},
+      */
 
-    sessionData.push({
-      timestamp: performance.now(),
-      acceleration: {x:data.acceleration?.x, y:data.acceleration?.y, z:data.acceleration?.z},
-      rotation: {x:data.rotation?.x, y:data.rotation?.y, z:data.rotation?.z},
-      metaData: {}
-    });
-        
-    processors.forEach((p) => {
-      p.processor.analyzeRealtime(data[p.sensorType][p.axis], debug);
-    });
-    
+      //Mock Data
+      acceleration: {X:mockX(), Y:mockY(), Z:mockZ()},
+      rotation: {X:random(-10, 10), Y:random(-10, 10), X:random(-10, 10)},
+      //Pressure data
+      //metaData: {}
+    }
+
+    //Store Raw Data
+    sessionData.push(data);
+    //Low Level Processors
+    updateAccelerationProcessors();
+
+    //High Level Processors
+    //These processors have access to raw & processed data
+
+    currentIndex++;
   }
   
-  function connectRealtimeProcessor(processor, sensorType, axis){
-    processors.push({processor, sensorType, axis});
-  }
   
-  return {
+  const session = {
     //Rename session to data, have to keep for now to make JSON work...
     set globalData(val){globalData = val},
     get sessionData(){return {global: globalData, session: [...sessionData]} },
     get recordData(){return recordData},
-    get connectRealtimeProcessor(){return connectRealtimeProcessor},
-    get clearRealtimeProcessors(){return () => processors.length = 0}
+    get connectAccelerationProcessor(){return connectAccelerationProcessor},
+    //get clearRealtimeProcessors(){return () => axialSensorProcessors.length = 0} //NEEDS TO BE REDONE...
+    get currentIndex(){return currentIndex},
   }
+
+  return session;
 }
 
 
@@ -52,14 +196,32 @@ function createSession(name){
 //---------------------------------Data Processing & Analyzers-------------------------------------
 
 const defaultPeakSettings = {
-  framesUntilPeakConfirm: 3,
+  framesUntilPeakConfirm: 2,
   frameCooldownThresh: 10,
   hiMode: {peakThresh: 5, resetThresh: 1},
   loMode: {peakThresh: -5, resetThresh: -1},
+  //Predictive Settings
+  //usePrediction: false,
+  //predictionThresh...
 }
 
 function createPeakAnalyzer(peakAnalyzerSettings, listeners){
-  
+  //Parent Session
+  let parentSession;
+  let dataFilter;
+  let debug = false;
+  let parentSessionData;
+  //Parent Buffers
+  let index;
+  let val;
+
+  function setupProcessor(parent, keys, sessionData, debugMode){
+    parentSession = parent;
+    parentSessionData = sessionData;
+    dataFilter = keys;
+    debug = debugMode;
+  }
+
   //Events
   let onHiPeakEvents = listeners?.onHiPeakEvents || [];
   let onLoPeakEvents = listeners?.onLoPeakEvents || [];
@@ -74,8 +236,6 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
   const loPeakThresh = peakAnalyzerSettings.loMode?.peakThresh;
   const loResetThresh = peakAnalyzerSettings.loMode?.resetThresh;
 
-  let debug = false;
-
   //Internal Buffers
   let prevPeakDir = 0;
   let maxVal = 0;
@@ -84,19 +244,19 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
   let framesSincePeakCandidate = 0;
   let framesSincePrevPeak = 0;
   
-  //Incremented buffers
-  let index;
-  let val;
+
 
   //Data
-  let data = [];
-  let peakData = [];
+  let interpolatedVal; //Not implemented...
+  const peakData = new Map(); //peaks.set(index, peakData), last peak is latest entry
+  //Total peaks (steps) = peakData.size
+
 
   function checkForHiPeak(){
     if(!hiMode) return;
     if(val < hiPeakThresh || val <= maxVal || prevPeakDir > 0) return;
     //Catch rapid polarity shifts
-    if(peakCandidateIndex >= 0 && data[peakCandidateIndex] < 0) confirmPeak();
+    if(peakCandidateIndex >= 0 && peakData.get(peakCandidateIndex) < 0) confirmPeak();//if(peakCandidateIndex >= 0 && data[peakCandidateIndex] < 0) confirmPeak();
     //We have exceded current peak candidate, set new
     if(debug) console.log(`hiC, val: ${val}, index: ${index}, pMax: ${maxVal}`);
     maxVal = val;
@@ -108,7 +268,7 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     if(!loMode) return;
     if(val > loPeakThresh || val >= minVal || prevPeakDir < 0) return;
     //Catch rapid polarity shifts
-    if(peakCandidateIndex >= 0 && data[peakCandidateIndex] > 0) confirmPeak();
+    if(peakCandidateIndex >= 0 && peakData.get(peakCandidateIndex) > 0) confirmPeak();//if(peakCandidateIndex >= 0 && data[peakCandidateIndex] > 0) confirmPeak();
     //We have exceded current peak candidate, set new
     if(debug) console.log(`loC, val: ${val}, index: ${index}, pMin: ${minVal}`);
     minVal = val;
@@ -124,17 +284,19 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
   }
   
   function confirmPeak(){
-    const peakObj = data[peakCandidateIndex];
-    const polarity = Math.sign(peakObj);
-    
-    peakData[peakCandidateIndex].isPeak = true;
+      
+    //INTERNAL DATA
+    let peakValue = getNestedKeys(parentSessionData[peakCandidateIndex], dataFilter);
+    peakData.set(peakCandidateIndex, peakValue);
+    const peakObj = {index: peakCandidateIndex, val: peakValue, parentSession};
     
     //FIRE EVENTS
-    //other data like time since previous peak?
+    const polarity = Math.sign(peakValue);
     if(polarity > 0) onHiPeakEvents.forEach((ev) => ev(peakObj));
     else onLoPeakEvents.forEach((ev) => ev(peakObj));
     
     if(debug) console.log(`peak confirm: ${peakObj}, index: ${peakCandidateIndex}`);
+
     //Reset & Set Buffers
     prevPeakDir = polarity;
     peakCandidateIndex = -1;
@@ -154,13 +316,13 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     }
 
     if(hiMode && prevPeakDir > 0 && val < hiResetThresh) resetBuffer();
-    else if(loMode && prevPeakDir < 0 && val > loResetThresh)resetBuffer();
+    else if(loMode && prevPeakDir < 0 && val > loResetThresh) resetBuffer();
   }
   
   function checkPeakConfirm(){
     if(peakCandidateIndex >= 0){
-      framesSincePeakCandidate++;
       if(framesSincePeakCandidate >= framesUntilPeakConfirm) confirmPeak();
+      framesSincePeakCandidate++;
     }
   }
 
@@ -169,33 +331,35 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     peakCandidateIndex = -1;
     framesSincePeakCandidate = 0;
     framesSincePrevPeak = 0;
-    data.length = 0;
-    peakData.length = 0;
+    peakData.length = 0; //clear? this is map now...
     index = 0;
   }
+
+  function analyzeRealtime(){
+    index = parentSession.currentIndex;
+    val = getNestedKeys(parentSessionData[parentSession.currentIndex], dataFilter);
+
+    incrementFramesPrevPeak();
+    checkForHiPeak();
+    checkForLoPeak();
+    calcCooldowns();
+    checkPeakConfirm();
+  }
+
+  /*
+  function analyzeOffline(data){
+    for(let i = 0; i < data.length; i++){
+      analyzeRealtime(data[i]);
+    }
+  }
+  */
   
   return {
-    get analyzeRealtime(){return (dataPoint, debugMode) => {
-      debug = debugMode;
-      data.push(dataPoint);
-      peakData.push({value: dataPoint});
-      index = data.length-1;
-      val = dataPoint;
-      incrementFramesPrevPeak();
-      checkForHiPeak();
-      checkForLoPeak();
-      calcCooldowns();
-      checkPeakConfirm();
-    }},
-    
-    get analyzeOffline(){return (data) => {
-      for(let i = 0; i < data.length; i++){
-        this.analyzeRealtime(data[i]);
-      }
-    }},
-    
+    get analyzeRealtime(){return analyzeRealtime},
+    //get analyzeOffline(){return analyzeOffline},
     get data(){return peakData},
-    get resetProcessor(){return resetProcessor}
+    get resetProcessor(){return resetProcessor},
+    get setupProcessor(){return setupProcessor},
   }
 }
 
@@ -216,33 +380,44 @@ const defaultZeroCrossingSettings = {
 }
 
 function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
-  //Value within 0 threshold
-  //Reset threshold gate (avoid multiple triggers)
-  //value changes polarity
-
   const resetThreshold = zeroCrossSettings.resetThreshold;
-  //const zeroCrossingThreshold = zeroCrossSettings.zeroCrossingThreshold;
-    
-  //Incremented buffers
+  
+  //Parent Session
+  let parentSession;
+  let dataFilter;
+  let parentSessionData;
+
+  //Incremented Parent Buffer
   let index;
-  //let val;
+
+  function setupProcessor(parent, keys, sessionData){
+    parentSession = parent;
+    parentSessionData = sessionData;
+    dataFilter = keys;
+  }
 
   //Data
   const data = [];
-  const zeroCrossingData = [];
+  //const zeroCrossingData = [];
+  const zeroCrossingData = new Map();
+  //zerCrossingDataMap.set(0, {eventType: "ZeroCrossing", value: 3})
 
+
+
+  //Internal Buffers
   let zeroCrossingCandidateIndex = -1;
   let resetMet = false;
   //let trending = 0;
 
   function analyze(){
+    
     if(data.length < 2) return;
-    if(!resetMet && Math.abs(data[index]) < resetThreshold) return;
+    if(!resetMet && Math.abs(data[data.length-1]) < resetThreshold) return;
     else resetMet = true;
-
+    
     //Zero crossing between frames
-    if(resetMet && (Math.sign(data[index]) != Math.sign(data[index-1]))){
-      if(Math.abs(data[index]) < Math.abs(data[index-1])) zeroCrossingCandidateIndex = index;
+    if(resetMet && (Math.sign(data[1]) != Math.sign(data[0]))){
+      if(Math.abs(data[1]) < Math.abs(data[0])) zeroCrossingCandidateIndex = index;
       else zeroCrossingCandidateIndex = index-1;
       confirmZeroCrossing();
     }
@@ -256,9 +431,20 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
   function confirmZeroCrossing(){
     //console.log(`index: ${data[index]} index-1: ${data[index-1]}`);
     resetMet = false;
-    zeroCrossingData[zeroCrossingCandidateIndex].isZeroCrossing = true;
+    //zeroCrossingData[zeroCrossingCandidateIndex].isZeroCrossing = true;
+    
+    
+    //What do we want to pass down to the event...
+    //-index
+    //-value
+    //-ref to session
+    const valIndex = zeroCrossingCandidateIndex < index ? 0 : 1;
+    zeroCrossingData.set(zeroCrossingCandidateIndex, data[valIndex]);
+    //console.log(zeroCrossingData.get(zeroCrossingCandidateIndex));
+    const zeroCrossObj = {index: zeroCrossingCandidateIndex, val: data[valIndex], parentSession};
+    listeners?.forEach((listener) => {listener(zeroCrossObj)});
+
     zeroCrossingCandidateIndex = -1;
-    listeners?.forEach((listener) => {listener()});
   }
 
   function resetProcessor(){
@@ -269,26 +455,42 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     resetMet = false;
   }
 
+  function analyzeRealtime(/*dataPoint*/){
+    
+    index = parentSession.currentIndex;
+    val = getNestedKeys(parentSessionData[parentSession.currentIndex], dataFilter);
+    //Just keep the last 2 values, should keep rest of algorithm working without refactoring
+    //while not eating up too much memory with a giant buffer array...
+    if(data.length > 1) data.splice(0, 1);
+    data.push(val);
+
+    //...?
+    //data.push(dataPoint);
+    //zeroCrossingData.push({value: dataPoint});
+    //index = data.length-1;
+    //val = dataPoint;
+
+
+    analyze();
+  }
+
+  function analyzeOffline(){
+    for(let i = 0; i < data.length; i++){
+      analyzeRealtime(data[i]);
+    }
+  }
+
   return {
-    get analyzeRealtime(){return (dataPoint, debugMode) => {
-      debug = debugMode;
-      data.push(dataPoint);
-      zeroCrossingData.push({value: dataPoint});
-      index = data.length-1;
-      val = dataPoint;
-      analyze();
-    }},
-    
-    get analyzeOffline(){return (data) => {
-      for(let i = 0; i < data.length; i++){
-        this.analyzeRealtime(data[i]);
-      }
-    }},
-    
+    get analyzeRealtime(){return analyzeRealtime},
+    get analyzeOffline(){return analyzeOffline},
     get data(){return zeroCrossingData},
+    get setupProcessor(){return setupProcessor},
     get resetProcessor(){return resetProcessor}
   }
 }
+
+
+
 
 function createTempoAnalyzer(settings, listeners){
   //Output:

@@ -20,7 +20,7 @@ sonificationPresets.addEventListener("change", () => {
   currentSimPreset?.onDeactivate();
   currentSimPreset = MobileAppProcessors[ind].simulatorSession;
   currentSession = createSession();
-  procArr.forEach((proc) => currentSession.connectRealtimeProcessor(proc.processor, proc.sensorType, proc.axis));
+  procArr.forEach((proc) => currentSession.connectAccelerationProcessor(proc.processor, proc.processorType, proc.axis));
 });
 
 
@@ -70,13 +70,17 @@ function initializeAppUX(){
 }
 
 
+//Move to session
+/*
 function recordData(){
   if(!recordingOn) return;
+  //GET SENSOR DATA W/O P5 VARS!
   currentSession.recordData({
     acceleration: {x:accelerationX, y:accelerationY, z:accelerationZ},
     rotation: {x:rotationX, y:rotationY, z:rotationZ}
   });
 }
+  */
 
 
 function requestSensorPermission() {
