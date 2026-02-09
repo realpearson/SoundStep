@@ -107,7 +107,7 @@ function renderEventTrigger(buffer, processor, scalar, yPos){
     //const dataPt = getNestedKeys(buffer[i], dataFilter);
     //point(x, -dataPt * scalar + yPos);
 
-    const dataPt = processor.data.get(i);
+    const dataPt = processor.processorData.get(i);
     if(dataPt !== undefined) circle(x, -dataPt * scalar + yPos, 5);
     
     //...
@@ -123,7 +123,8 @@ function renderEventTrigger(buffer, processor, scalar, yPos){
 }
 
 
-function renderRawData(buffer, dataFilter, scalar, yPos, name){
+function renderRawData(buffer, dataFilter, scalar, yPos, name, offset){
+  if(!offset) offset = 0;
   //const buffer = processor.
   strokeWeight(1);
   stroke(0)
@@ -137,8 +138,8 @@ function renderRawData(buffer, dataFilter, scalar, yPos, name){
     let x = i;
     if(buffer.length >= width) x -= (buffer.length-width);
     const dataPt = getNestedKeys(buffer[i], dataFilter);
-    point(x, -dataPt * scalar + yPos);
-    //vertex(i, -buffer[i].value * scalar + yPos);
+    point(x, -dataPt * scalar + yPos + offset);
+    //vertex(i, -buffer[i].value * scalar + yPos + offset);
 
 
   }
@@ -175,6 +176,7 @@ function renderDataCurve(buffer, scalar, yPos, name){
 //Simulator should wrap around a real session object rather than being another version of a session...
 //That way we can pass the real session into the processors...
 function createSimulator(data){
+  const session = createSession();
   //Loaded in via preset
   let processors;
   let render;
@@ -198,6 +200,103 @@ function createSimulator(data){
     return (totMillis / data.session.length-1);
   }
   */
+
+  //ONLY FOR ACCEL PROCs...
+  function setupProcessors(){
+    processors.forEach((p) => {
+      //const dataFilter = ["acceleration", p.axis];
+      //p.processor.setupProcessor(simulatorSession, dataFilter, data.session);
+      session.connectAccelerationProcessor(p.processor, p.processorType, p.axis);
+    })
+    
+  }
+
+  function increment(debug){
+    if(!active) return;
+    if(inc >= data.session.length-1) return;
+
+    
+
+    if(timeOffsetAccumulator > discrepencyThreshold * dataFrameLen){
+      //Insert extra frame to compensate
+      step(debug);
+      step(debug);
+      //timeOffsetAccumulator -= discrepencyThreshold * dataFrameLen;
+    } else if(timeOffsetAccumulator < -discrepencyThreshold * dataFrameLen){
+      //Skip frame to compensate
+      //timeOffsetAccumulator += discrepencyThreshold * dataFrameLen;
+    } else {
+      step(debug);
+    }
+
+    
+    if(debug) console.log("------------------");
+  }
+
+  function step(debug){
+    //Accumulate difference between target frame length and actual
+    timeOffsetAccumulator += deltaTime-dataFrameLen;
+    simulationBuffer.push(data.session[inc]);
+    session.simulateRecordData(data.session[inc]);
+
+    if(inc > 0) dataFrameLen = data.session[inc].timestamp - data.session[inc-1].timestamp;
+    inc++;
+  }
+
+
+  function reset(){
+    //Reset Simulator
+    timeOffsetAccumulator = 0;
+    inc = 0;
+    //Reset Processors
+    processors.forEach((p) => p.processor.resetProcessor());
+  }
+  
+  const simulatorSession = {
+    get increment(){return increment},
+    get currentIndex(){return inc},
+    get setDataPos(){return (pos) => {inc = pos < data.session.length ? pos : inc}},
+    get dataPos(){return inc},
+    get loadPreset(){return function(simPreset){
+      processors = simPreset.processors;
+      setupProcessors();
+      render = simPreset.render;
+      preset = simPreset;
+    }},
+    get play(){return () => {
+      active = true;
+      preset.onActivate();
+    }},
+    get stop(){return () => {
+      active = false;
+      preset.onDeactivate();
+    }},
+    get render(){return function(){
+      if(render) render(simulationBuffer);
+    }},
+    get reset(){return reset}
+  }
+
+  return simulatorSession;
+}
+
+/*
+function createSimulator(data){
+  //Loaded in via preset
+  let processors;
+  let render;
+  let preset;
+
+  //Internal Logic
+  let active = false;
+  let inc = 0;
+  let timeOffsetAccumulator = 0;
+  let dataFrameLen = deltaTime;//calcDataFR();
+  const discrepencyThreshold = 2;
+
+  const simulationBuffer = [];
+
+
 
   //ONLY FOR ACCEL PROCs...
   function setupProcessors(){
@@ -280,3 +379,4 @@ function createSimulator(data){
 
   return simulatorSession;
 }
+ */

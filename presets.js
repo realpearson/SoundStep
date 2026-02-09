@@ -1,8 +1,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
-
 function createAsphaltSimulatorSession(){
     //Setup Sounds
+    
     const soundAddress = "assets/audio_files/Footsteps/Footstep asphalt ";
     let addresses = [];
     for(let i = 0; i < 10; i++) addresses.push(soundAddress + (i +1) + ".wav");
@@ -19,40 +19,46 @@ function createAsphaltSimulatorSession(){
     wind.setGain(1.5);
     let windVoice;
     
+    
     //Listeners
     const stepListeners = {
         //onHiPeakEvents: [() => foots.play()],
         onLoPeakEvents: [
             () => foots.playRandom(0, random(1, 1.1), random(0.1)),
-            () => console.log("asphalt lo peak")
+            //() => console.log("asphalt lo peak")
         ]
     }
+
+    const zXListeners = [
+        //() => console.log("ZX"),
+    ]
     
     //....
 
     //Processors
-    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, /*stepListeners*/);
+    const peakXProcessor = createLowLevelChildPEAK(defaultPeakSettings, stepListeners);
     
-    const peakYProcessor = createPeakAnalyzer(defaultPeakSettings, null);
-    const peakZProcessor = createPeakAnalyzer(defaultPeakSettings, null);
-    const rawYProcessor = createDataBucket();
-    const rawRotZProcessor = createDataBucket();
-    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, stepListeners.onLoPeakEvents);
+    const peakYProcessor = createLowLevelChildPEAK(defaultPeakSettings, null);
+    //const peakZProcessor = createPeakAnalyzer(defaultPeakSettings, null);
+    //const rawYProcessor = createDataBucket();
+    //const rawRotZProcessor = createDataBucket();
+    const zeroXingProcessor = createLowLevelChildZXING(defaultZeroCrossingSettings, zXListeners);
     
 
     //Processor Array
     const testProcessorArr = [
-        {processor: peakXProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: AXIS.X},
-        ////{processor: rawYProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: AXIS.Y},
-        //{processor: rawRotZProcessor, processorType: "rotation", axis: AXIS.Z},
-        //{processor: peakYProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: AXIS.Y},
-        //{processor: peakZProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: AXIS.Z},
-        {processor: zeroXingProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.ZERO_CROSSING, axis: AXIS.X}
+        {processor: peakXProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.X},
+        ////{processor: rawYProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.Y},
+        //{processor: rawRotZProcessor, processorType: "rotation", axis: DATA_TYPES.Z},
+        //{processor: peakYProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.Y},
+        //{processor: peakZProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.Z},
+        {processor: zeroXingProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.ZERO_CROSSING, axis: DATA_TYPES.X}
     ]
 
 
     //These need to get called in both simulator and runrecorder!!!!
     function onActivate(){
+        /*
         console.log("asphalt load")
         windVoice = wind.play();
         windVoice.loop = true;
@@ -63,28 +69,31 @@ function createAsphaltSimulatorSession(){
         }
 
         birdTrigger();
+        */
     }
 
     function onDeactivate(){
+        /*
         windVoice.stop(0);
         windVoice = null;
         clearTimeout(birdTimeoutID);
+        */
     }
 
     //Simulator Rendering
     function render(rawData){
-        //renderDataCurve(peakXProcessor, 0.5, 60, "Vertical Accel");
-        if(rawData.length > 0) renderRawData(rawData, ["acceleration", AXIS.X], 0.5, 60, "Vertical Accel");
+        if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.X], 0.5, 60, "Vertical Accel");
         renderEventTrigger(rawData, peakXProcessor, 0.5, 60);
         
-        
-        //renderDataCurve(peakYProcessor, 0.5, 60 + laneSpacing);
-
-        //renderDataCurve(zeroXingProcessor, 0.5, 60 + laneSpacing * 2);
-        if(rawData.length > 0) renderRawData(rawData, ["acceleration", AXIS.X], 0.5, 60 + laneSpacing, "Vertical Accel");
+        if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.X], 0.5, 60 + laneSpacing, "Vertical Accel");
         renderEventTrigger(rawData, zeroXingProcessor, 0.5, 60 + laneSpacing);
+                
+        //if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.Y], 0.5, 60 + laneSpacing * 2, "Y");
+        //if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.Z], 0.5, 60 + laneSpacing * 3, "Z");
         
-        //renderDataCurve(rawRotZProcessor, 4, 60 + laneSpacing * 3)
+        if(rawData.length > 0) renderRawData(rawData, ["rotation", DATA_TYPES.X], 500, 60 + laneSpacing * 4, "X ROT");
+        if(rawData.length > 0) renderRawData(rawData, ["rotation", DATA_TYPES.Y], 100, 60 + laneSpacing * 5, "Y ROT");
+        if(rawData.length > 0) renderRawData(rawData, ["rotation", DATA_TYPES.Z], 100, 60 + laneSpacing * 6, "Z ROT", 485);
 
         alignmentChecker();
     }

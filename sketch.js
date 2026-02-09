@@ -40,7 +40,7 @@ function setup() {
   
   if(appState.mode === appState.modes.desktop){
     desktopDiv.hidden = false;
-    createCanvas(900, 500, desktopCanvas);
+    createCanvas(900, 900, desktopCanvas);
   }
 
 }

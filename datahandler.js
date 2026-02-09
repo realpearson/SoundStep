@@ -2,24 +2,31 @@
 //SessionData=(globals/everything) -> processing buffers
 //Press record-> Create session, create global data, create raw data, map to processing buffers
 
+const SENSOR_TYPES = {
+  ACCELERATION: "acceleration",
+  ROTATION: "rotation", //Gyro?
+  PRESSURE: "pressure"
+}
 
 const LOW_LEVEL_PROCESSOR_TYPES = {
-  PEAK_DETECTION: "peak_detection",
-  ZERO_CROSSING_DETECTION: "zero_crossing_detection",
-  FOOT_SIDE_DETECTION: "foot_side_detection",
-  RANGE_DETECTION: "range_detection",
+  PEAK: "PEAK",
+  ZERO_CROSSING: "ZERO_CROSSING",
+  //FOOT_SIDE_DETECTION: "foot_side_detection", High level!
+  RANGE: "RANGE",
 
 }
+
 
 const ACCELERATION_PROCESSOR_TYPES = {
   PEAK: "PEAK",
   ZERO_CROSSING: "ZERO_CROSSING"
 }
 
-const AXIS = {
+const DATA_TYPES = {
   X: "X",
   Y: "Y",
-  Z: "Z"
+  Z: "Z",
+  PRESSURE_DATA: "PRESSURE_DATA"
 }
 
 /**
@@ -43,7 +50,7 @@ const AXIS = {
 
 const HIGH_LEVEL_PROCESSOR_TYPES = {
   BPM_DETECTION: "bpm_detection",
-
+  FOOT_SIDE: "FOOT_SIDE"
 }
 
 //Helper for data filtering
@@ -54,28 +61,45 @@ function getNestedKeys(obj, keys){
 }
 
 function createSession(params){
+  
   let globalData = null;
+  //GLOBAL LATENCY (based on max latency of processor, ex peak proc @ 2 or 3 frames)
   
   //lowLevelProcessors only accept raw sensor data.
   const accelerationProcessors = {
     [ACCELERATION_PROCESSOR_TYPES.PEAK]: {
-      [AXIS.X]: null,
-      [AXIS.Y]: null,
-      [AXIS.Z]: null,
+      [DATA_TYPES.X]: null,
+      [DATA_TYPES.Y]: null,
+      [DATA_TYPES.Z]: null,
     },
     [ACCELERATION_PROCESSOR_TYPES.ZERO_CROSSING] : {
-      [AXIS.X]: null,
-      [AXIS.Y]: null,
-      [AXIS.Z]: null,
+      [DATA_TYPES.X]: null,
+      [DATA_TYPES.Y]: null,
+      [DATA_TYPES.Z]: null,
     }
   }
+
+  /////////
+  const lowLevelProcessors = new Map();
+
+  function connectLowLevelProcessor(processor, processorType, sensorType, dataType, name){
+    //Helper function to check for valid: processorType, sensorType, dataType
+    lowLevelProcessors.set(name, {processor, processorType, sensorType, dataType, name});
+    //Check it name not valid & give error
+  }
+
+  function getLowLevelProcessor(name){
+    return lowLevelProcessors.get(name);
+  }
+
+  ////////
 
   function checkAccelProcType(type, axis){
     if(!Object.keys(ACCELERATION_PROCESSOR_TYPES).includes(type)){
       console.warn("No processor of type: " + type);
       return;
     }
-    if(!Object.keys(AXIS).includes(axis)){
+    if(!Object.keys(DATA_TYPES).includes(axis)){
       console.warn(axis + " is not a valid axis");
       return;
     }
@@ -86,7 +110,9 @@ function createSession(params){
     if(! checkAccelProcType(type, axis)) return;
     accelerationProcessors[type][axis] = processor;
     const dataFilter = ["acceleration", axis];
-    processor.setupProcessor(session, dataFilter, sessionData);
+    //parent, sessionData, processorSensorType, processorDataType
+    processor.setupProcessor(session, sessionData, SENSOR_TYPES.ACCELERATION, axis);
+    //processor.setupProcessor(session, dataFilter, sessionData);
   }
 
   function getAccelerationProcessor(type, axis){
@@ -98,6 +124,7 @@ function createSession(params){
     Object.keys(accelerationProcessors).forEach((type) => {
       Object.keys(accelerationProcessors[type]).forEach((axis) => {
         if(accelerationProcessors[type][axis]) {
+          //console.log(accelerationProcessors[type][axis])
           accelerationProcessors[type][axis].analyzeRealtime();
         }
       })
@@ -120,7 +147,6 @@ function createSession(params){
   //previous data indexes. Event callbacks use indexes to reference relevant data
   //rather than receiving data.
   let currentIndex = 0;
-  let upstreamData = [];
 
 
   function createMockSinData(){
@@ -135,7 +161,6 @@ function createSession(params){
   const mockY = createMockSinData();
   const mockZ = createMockSinData();
 
-  
   function recordData(){
 
     const timestamp = performance.now();
@@ -151,12 +176,16 @@ function createSession(params){
     }
 
     const data = {
+      //Header Data
       timestamp,
       index: currentIndex, //Makes it quick to cross corralate between data sets
       //GET SENSOR DATA W/O P5 VARS!
+
+      //Sensor Types & Data
       /*
       acceleration: {x:accelerationX, y:accelerationY, z:accelerationZ},
       rotation: {x:rotationX, y:rotationY, z:rotationZ},
+      pressure: {pressureValue: 0},
       */
 
       //Mock Data
@@ -176,6 +205,14 @@ function createSession(params){
 
     currentIndex++;
   }
+
+
+
+  function simulateRecordData(simData){
+    sessionData.push(simData);
+    updateAccelerationProcessors();
+    currentIndex++;
+  }
   
   
   const session = {
@@ -183,6 +220,7 @@ function createSession(params){
     set globalData(val){globalData = val},
     get sessionData(){return {global: globalData, session: [...sessionData]} },
     get recordData(){return recordData},
+    get simulateRecordData(){return simulateRecordData},
     get connectAccelerationProcessor(){return connectAccelerationProcessor},
     //get clearRealtimeProcessors(){return () => axialSensorProcessors.length = 0} //NEEDS TO BE REDONE...
     get currentIndex(){return currentIndex},
@@ -205,6 +243,9 @@ const defaultPeakSettings = {
   //predictionThresh...
 }
 
+
+
+
 function createPeakAnalyzer(peakAnalyzerSettings, listeners){
   //Parent Session
   let parentSession;
@@ -215,11 +256,10 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
   let index;
   let val;
 
-  function setupProcessor(parent, keys, sessionData, debugMode){
+  function setupProcessor(parent, keys, sessionData){
     parentSession = parent;
     parentSessionData = sessionData;
     dataFilter = keys;
-    debug = debugMode;
   }
 
   //Events
@@ -339,6 +379,15 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     index = parentSession.currentIndex;
     val = getNestedKeys(parentSessionData[parentSession.currentIndex], dataFilter);
 
+    const sensorType = SENSOR_TYPES.ACCELERATION;
+    const axis = DATA_TYPES.X;
+    const processorType = LOW_LEVEL_PROCESSOR_TYPES.PEAK_DETECTION;
+
+    //Processor needs sensorType & axis as key to data
+    //Externally we need processorType & axis to access a specific processor
+    //Map again for easy access by name?
+    const pobj = {processor: null, sensorType, axis, processorType, name:"default"}
+
     incrementFramesPrevPeak();
     checkForHiPeak();
     checkForLoPeak();
@@ -363,15 +412,7 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
   }
 }
 
-function createDataBucket(){
-  const bucket = [];
 
-  return {
-    get analyzeRealtime(){return (dataPoint) => bucket.push({value: dataPoint})},
-    get data(){return bucket},
-    get resetProcessor(){return () => bucket.length = 0}
-  }
-}
 
 
 const defaultZeroCrossingSettings = {
@@ -498,17 +539,62 @@ function createTempoAnalyzer(settings, listeners){
   //avg time over last X steps
   //avg time total
   //estimated BPM last, X steps, total
+  //running average
+
+  const runningAverageBucket = []
+  let runningAverageTime = -1;
+  let estimatedBPM = -1;
+  let fluctuation = 0; //If fluctuation too high bpm is not reliable, also good if we want to wait until stable value
 
   //Pause function for when RUN_STATE changes (STOPPED, OTHER), timeout thresh in settings...
 }
 
 function createRunningFootAnalyzer(settings, listeners){
   //Output: FOOT_STATES
+  
+  //This is easy to detect with X ROT data, for each acceleration peak the rotation peak switches polarity
+  //All we have to do is look at the previous X ROT peak to know wheather it was a left or right step
+
+  //Total right/ left steps
+  //Right/ left events
+
+  //Only turn on when it's time
+  let active = false;
+
+  //Parent Session
+  let parentSession;
+  let dataFilter;
+  let parentSessionData;
+
+  //Incremented Parent Buffer
+  let index;
+
+  function setupProcessor(parent, keys, sessionData){
+    parentSession = parent;
+    parentSessionData = sessionData;
+    dataFilter = keys;
+
+    //parentSession.getAccelerationProcessor()
+    //WE could just add an event listener to X ROT peak detector...
+  }
+
+  function analyzeRealtime(){
+    index = parentSession.currentIndex;
+
+    //Find previous X ROT Peak 
+  }
+
+  return {
+    get analyzeRealtime(){return analyzeRealtime},
+    get setupProcessor(){return setupProcessor}
+  }
 }
 
 function createRunWalkAnalyzer(settings, listeners){
   //Output: RUN_STATES
   //Detect if there is no flight stage? Generation/ loading response thresholds?
+
+  //There is a really clear pattern in the X ROT data when walking, graph in the sanbox to see
 }
 
 function createThresholdAnalyzer(settings, listeners){
@@ -615,6 +701,8 @@ function createRunningAnalyzer(){
   //######End Outline########//
 
 
+  //Total steps can be grabbed from the length of the acceleration x peak data
+
 
   const runningData = createInitialRunningAnalyzerData();
 
@@ -630,6 +718,31 @@ function createRunningAnalyzer(){
 
 
 //Peak frequency analyzer, other data, time between steps etc...
+
+
+
+
+/*
+//STATES STATES STATES//
+
+There will be a lot of high level logic to piece together logic
+
+-When do we start counting steps?
+-Keeping track of step count while walking, jogging, running etc... also where they right or left steps?
+-Callibration (especially for rotation) to find null axis
+-Lots of thresholds, peak amplitudes, time between steps, etc... for determining current state (think intervals, warmup, adhering to goals, etc...)
+
+GESTURES
+-Gesture system for controlling application with sound/ voice feedback
+-Jump 3 times, lean left/ right, lean forward for 2 seconds etc...
+
+//Papers about the interface, application and design itself?
+
+
+
+
+*/
+
 
 //---------------------------------Import Export Data-------------------------------------
 function exportData(data){
