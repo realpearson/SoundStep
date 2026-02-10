@@ -317,6 +317,11 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
 /*----------------------HIGH LEVEL PROCESSORS-----------------------*/
 
 
+
+
+
+
+
 //---------------------------------Data Processing & Analyzers-------------------------------------
 
 function createTempoAnalyzer(settings, listeners){

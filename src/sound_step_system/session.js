@@ -1,7 +1,3 @@
-//Store all raw data -> divide into processing buffers -> process data
-//SessionData=(globals/everything) -> processing buffers
-//Press record-> Create session, create global data, create raw data, map to processing buffers
-
 //---------------------STATES & TYPES----------------------//
 const SENSOR_TYPES = {
   ACCELERATION: "acceleration",
@@ -56,10 +52,12 @@ const ACTIVITY_STATES = {
 
 //----------------------- SESSION ------------------------//
 function createSession(params){
+  //Raw data from sensors
+  const sessionData = [];
+  let currentIndex = 0;
   
   let globalData = null;
   //GLOBAL LATENCY (based on max latency of processor, ex peak proc @ 2 or 3 frames)
-
 
   //Low Level Processors : Reads only raw data, does not depend on any other processor
   const lowLevelProcessors = new Map();
@@ -97,39 +95,6 @@ function createSession(params){
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-  //sessionData only stores raw sensor data
-  const sessionData = [];
-  //currentIndex is the 'master clock' and allows algorithms to cross correlate
-  //between data arrays. Some algorithms have latency and need to reference
-  //previous data indexes. Event callbacks use indexes to reference relevant data
-  //rather than receiving data.
-  let currentIndex = 0;
-
-
-  function createMockSinData(){
-    let theta = ((Math.random()-0.5) * 2) * Math.PI;
-    return function(){
-      theta += 0.4;
-      return Math.sin(theta) * 40;
-    }
-  }
-
-  const mockX = createMockSinData();
-  const mockY = createMockSinData();
-  const mockZ = createMockSinData();
-
   function recordData(){
 
     const timestamp = performance.now();
@@ -147,10 +112,8 @@ function createSession(params){
     const data = {
       //Header Data
       timestamp,
-      index: currentIndex, //Makes it quick to cross corralate between data sets
+      index: currentIndex,
       //GET SENSOR DATA W/O P5 VARS!
-
-      //Sensor Types & Data
       /*
       acceleration: {x:accelerationX, y:accelerationY, z:accelerationZ},
       rotation: {x:rotationX, y:rotationY, z:rotationZ},
@@ -166,23 +129,21 @@ function createSession(params){
 
     //Store Raw Data
     sessionData.push(data);
+    
     //Low Level Processors
     updateLowLevelProcessors();
 
     //High Level Processors
-    //These processors have access to raw & processed data
+    //...
 
     currentIndex++;
   }
-
-
 
   function simulateRecordData(simData){
     sessionData.push(simData);
     updateLowLevelProcessors();
     currentIndex++;
   }
-  
   
   const session = {
     //Rename session to data, have to keep for now to make JSON work...
@@ -199,3 +160,15 @@ function createSession(params){
 }
 
 
+//Helper for creating mock data for tests
+function createMockSinData(){
+  let theta = ((Math.random()-0.5) * 2) * Math.PI;
+  return function(){
+    theta += 0.4;
+    return Math.sin(theta) * 40;
+  }
+}
+
+const mockX = createMockSinData();
+const mockY = createMockSinData();
+const mockZ = createMockSinData();

@@ -49,20 +49,28 @@
 
       
     </main>
-    <script src="p5.js"></script>
+    <!--RESOURCES-->
+    <script src="libs/p5.js"></script>
 
-    <script src="sound_engine/audio_system.js"></script>
-    <script src="sound_engine/es1_synth.js"></script>
-    <script src="sound_engine/app.js"></script>
-    <script src="sound_engine/sound_engine.js"></script>
-    <script src="local_request_handling.js"></script>
-    <script src="session.js"></script>
-    <script src="processors.js"></script>
-    <script src="combination_presets.js"></script>
-    <script src="presets.js"></script>
-    <script src="oskar_presets.js"></script>
-    <script src="dataviewer.js"></script>
-    <script src="runrecorder.js"></script>
-    <script src="sketch.js"></script>
+    <script src="libs/sound_engine/audio_system.js"></script>
+    <script src="libs/sound_engine/es1_synth.js"></script>
+    <script src="libs/sound_engine/app.js"></script>
+    <script src="libs/sound_engine/sound_engine.js"></script>
+
+    <!--SYSTEM-->
+    <script src="src/sound_step_system/processors.js"></script>
+    <script src="src/sound_step_system/session.js"></script>
+    <script src="src/sound_step_system/simulator.js"></script>
+
+    <!--PRESETS-->
+    <script src="src/app/presets/combination_presets.js"></script>
+    <script src="src/app/presets/presets.js"></script>
+    <script src="src/app/presets/oskar_presets.js"></script>
+    
+    <!--APP-->
+    <script src="src/app/local_request_handling.js"></script>
+    <script src="src/app/runrecorder.js"></script>
+    <script src="src/app/dataviewer.js"></script>
+    <script src="src/app/sketch.js"></script>
   </body>
 </html>
