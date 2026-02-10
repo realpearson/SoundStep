@@ -36,23 +36,30 @@ function createAsphaltSimulatorSession(){
     //....
 
     //Processors
-    const peakXProcessor = createLowLevelChildPEAK(defaultPeakSettings, stepListeners);
-    
-    const peakYProcessor = createLowLevelChildPEAK(defaultPeakSettings, null);
+    const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, stepListeners);
+    //const peakYProcessor = createPeakAnalyzer(defaultPeakSettings, null);
     //const peakZProcessor = createPeakAnalyzer(defaultPeakSettings, null);
-    //const rawYProcessor = createDataBucket();
-    //const rawRotZProcessor = createDataBucket();
-    const zeroXingProcessor = createLowLevelChildZXING(defaultZeroCrossingSettings, zXListeners);
+    const zeroXingProcessor = createZeroCrossingAnalyzer(defaultZeroCrossingSettings, zXListeners);
     
 
     //Processor Array
     const testProcessorArr = [
-        {processor: peakXProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.X},
-        ////{processor: rawYProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.Y},
-        //{processor: rawRotZProcessor, processorType: "rotation", axis: DATA_TYPES.Z},
-        //{processor: peakYProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.Y},
-        //{processor: peakZProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.PEAK, axis: DATA_TYPES.Z},
-        {processor: zeroXingProcessor, processorType: ACCELERATION_PROCESSOR_TYPES.ZERO_CROSSING, axis: DATA_TYPES.X}
+        {
+            processor: peakXProcessor, 
+            processorType: LOW_LEVEL_PROCESSOR_TYPES.PEAK, 
+            sensorType: SENSOR_TYPES.ACCELERATION,  
+            dataType: DATA_TYPES.X
+        },
+        ////{processor: rawYProcessor, processorType: LOW_LEVEL_PROCESSOR_TYPES.PEAK, sensorType: SENSOR_TYPES.ACCELERATION, dataType: DATA_TYPES.Y},
+        //{processor: rawRotZProcessor, processorType: "?", sensorType: SENSOR_TYPES.ROTATION, dataType: DATA_TYPES.Z},
+        //{processor: peakYProcessor, processorType: LOW_LEVEL_PROCESSOR_TYPES.PEAK, sensorType: SENSOR_TYPES.ACCELERATION, dataType: DATA_TYPES.Y},
+        //{processor: peakZProcessor, processorType: LOW_LEVEL_PROCESSOR_TYPES.PEAK, sensorType: SENSOR_TYPES.ACCELERATION, dataType: DATA_TYPES.Z},
+        {
+            processor: zeroXingProcessor, 
+            processorType: LOW_LEVEL_PROCESSOR_TYPES.ZERO_CROSSING, 
+            sensorType: SENSOR_TYPES.ACCELERATION, 
+            dataType: DATA_TYPES.X
+        }
     ]
 
 
@@ -82,18 +89,18 @@ function createAsphaltSimulatorSession(){
 
     //Simulator Rendering
     function render(rawData){
-        if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.X], 0.5, 60, "Vertical Accel");
+        renderRawData(rawData, [SENSOR_TYPES.ACCELERATION, DATA_TYPES.X], 0.5, 60, "Vertical Accel");
         renderEventTrigger(rawData, peakXProcessor, 0.5, 60);
         
-        if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.X], 0.5, 60 + laneSpacing, "Vertical Accel");
+        renderRawData(rawData, [SENSOR_TYPES.ACCELERATION, DATA_TYPES.X], 0.5, 60 + laneSpacing, "Vertical Accel");
         renderEventTrigger(rawData, zeroXingProcessor, 0.5, 60 + laneSpacing);
                 
-        //if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.Y], 0.5, 60 + laneSpacing * 2, "Y");
-        //if(rawData.length > 0) renderRawData(rawData, ["acceleration", DATA_TYPES.Z], 0.5, 60 + laneSpacing * 3, "Z");
+        //renderRawData(rawData, [SENSOR_TYPES.ACCELERATION, DATA_TYPES.Y], 0.5, 60 + laneSpacing * 2, "Y");
+        //renderRawData(rawData, [SENSOR_TYPES.ACCELERATION, DATA_TYPES.Z], 0.5, 60 + laneSpacing * 3, "Z");
         
-        if(rawData.length > 0) renderRawData(rawData, ["rotation", DATA_TYPES.X], 500, 60 + laneSpacing * 4, "X ROT");
-        if(rawData.length > 0) renderRawData(rawData, ["rotation", DATA_TYPES.Y], 100, 60 + laneSpacing * 5, "Y ROT");
-        if(rawData.length > 0) renderRawData(rawData, ["rotation", DATA_TYPES.Z], 100, 60 + laneSpacing * 6, "Z ROT", 485);
+        renderRawData(rawData, [SENSOR_TYPES.ROTATION, DATA_TYPES.X], 500, 60 + laneSpacing * 4, "X ROT");
+        renderRawData(rawData, [SENSOR_TYPES.ROTATION, DATA_TYPES.Y], 100, 60 + laneSpacing * 5, "Y ROT");
+        renderRawData(rawData, [SENSOR_TYPES.ROTATION, DATA_TYPES.Z], 100, 60 + laneSpacing * 6, "Z ROT", 485);
 
         alignmentChecker();
     }

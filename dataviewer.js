@@ -32,18 +32,11 @@ resetButton.onclick = () => {
   simulator.reset();
 }
 
-//This is still very ugly...
-//Called by fetch in datahandler.js
-function onImportData(data){
-  currentData = data;
-  simulator = createSimulator(data);
-  //simulator.setDataPos(450);
-}
 
 const loadBttn = document.getElementById("loadBttn");
 loadBttn.addEventListener("change", uploadData, false);
 
-const dataSelect = document.getElementById("SelectRunData");
+const runDataSelect = document.getElementById("SelectRunData");
 const presetSelect = document.getElementById("PresetSelectDesktop");
 
 MobileAppProcessors.forEach((preset) => {
@@ -62,21 +55,9 @@ presetSelect.addEventListener("change", () => {
   simulator?.loadPreset(MobileAppProcessors[ind].simulatorSession);
 });
 
+runDataSelect.addEventListener("change", fetchLocalData);
 
-async function fetchLocalData(event){
-  if(event.target.value){
-    const requestURL = event.target.value;
-    const request = new Request(requestURL);
-    const response = await fetch(request);
-    const data = await response.json();
-    currentData = data;
-    simulator = createSimulator(data);
-    //Dont hard code this...
-    //simulator.loadPreset(asphaltWithAmbienceSession);
-    //simulator.setDataPos(500);
-  }
-}
-dataSelect.addEventListener("change", fetchLocalData);
+
 
 function updateSimulator(){
   if(!simulator) return;
@@ -99,7 +80,6 @@ function alignmentChecker(){
 //-New simulator that houses a normal session
 //-Offline mode that pre-calculates all data
 
-
 function renderEventTrigger(buffer, processor, scalar, yPos){
   for(let i = 0; i < buffer.length; i++){
     let x = i;
@@ -116,12 +96,8 @@ function renderEventTrigger(buffer, processor, scalar, yPos){
       circle(x, -buffer[i].value * scalar + yPos, 5);
       noFill();
     }
-
-
   }
-
 }
-
 
 function renderRawData(buffer, dataFilter, scalar, yPos, name, offset){
   if(!offset) offset = 0;
@@ -137,7 +113,7 @@ function renderRawData(buffer, dataFilter, scalar, yPos, name, offset){
   for(let i = 0; i < buffer.length; i++){
     let x = i;
     if(buffer.length >= width) x -= (buffer.length-width);
-    const dataPt = getNestedKeys(buffer[i], dataFilter);
+    const dataPt = buffer[i][dataFilter[0]][dataFilter[1]];
     point(x, -dataPt * scalar + yPos + offset);
     //vertex(i, -buffer[i].value * scalar + yPos + offset);
 
@@ -145,7 +121,6 @@ function renderRawData(buffer, dataFilter, scalar, yPos, name, offset){
   }
   endShape();
 }
-
 
 function renderDataCurve(buffer, scalar, yPos, name){
   //const buffer = processor.
@@ -173,8 +148,7 @@ function renderDataCurve(buffer, scalar, yPos, name){
   endShape();
 }
 
-//Simulator should wrap around a real session object rather than being another version of a session...
-//That way we can pass the real session into the processors...
+
 function createSimulator(data){
   const session = createSession();
   //Loaded in via preset
@@ -191,22 +165,10 @@ function createSimulator(data){
 
   const simulationBuffer = [];
 
-  /*
-  function calcDataFR(){
-    let totMillis = 0;
-    for(let i = 1; i < data.session.length; i++){
-      totMillis += data.session[i].timestamp-data.session[i-1].timestamp;
-    }    
-    return (totMillis / data.session.length-1);
-  }
-  */
 
-  //ONLY FOR ACCEL PROCs...
   function setupProcessors(){
     processors.forEach((p) => {
-      //const dataFilter = ["acceleration", p.axis];
-      //p.processor.setupProcessor(simulatorSession, dataFilter, data.session);
-      session.connectAccelerationProcessor(p.processor, p.processorType, p.axis);
+      session.connectLowLevelProcessor(p.processor, p.processorType, p.sensorType, p.dataType);
     })
     
   }
@@ -272,111 +234,10 @@ function createSimulator(data){
       preset.onDeactivate();
     }},
     get render(){return function(){
-      if(render) render(simulationBuffer);
+      if(render && simulationBuffer.length > 0) render(simulationBuffer);
     }},
     get reset(){return reset}
   }
 
   return simulatorSession;
 }
-
-/*
-function createSimulator(data){
-  //Loaded in via preset
-  let processors;
-  let render;
-  let preset;
-
-  //Internal Logic
-  let active = false;
-  let inc = 0;
-  let timeOffsetAccumulator = 0;
-  let dataFrameLen = deltaTime;//calcDataFR();
-  const discrepencyThreshold = 2;
-
-  const simulationBuffer = [];
-
-
-
-  //ONLY FOR ACCEL PROCs...
-  function setupProcessors(){
-    processors.forEach((p) => {
-      const dataFilter = ["acceleration", p.axis];
-      p.processor.setupProcessor(simulatorSession, dataFilter, data.session);
-    })
-    
-  }
-
-  function increment(debug){
-    if(!active) return;
-    if(inc >= data.session.length-1) return;
-
-    
-    //Accumulate difference between target frame length and actual
-    timeOffsetAccumulator += deltaTime-dataFrameLen;
-
-    if(timeOffsetAccumulator > discrepencyThreshold * dataFrameLen){
-      //Insert extra frame to compensate
-      step(debug);
-      step(debug);
-      timeOffsetAccumulator -= discrepencyThreshold * dataFrameLen;
-    } else if(timeOffsetAccumulator < -discrepencyThreshold * dataFrameLen){
-      //Skip frame to compensate
-      timeOffsetAccumulator += discrepencyThreshold * dataFrameLen;
-    } else {
-      step(debug);
-    }
-
-    
-    if(debug) console.log("------------------");
-  }
-
-  function step(debug){
-    //This is now only acceleration processors...
-    processors.forEach((p) => {
-      const keys = ["acceleration", p.axis];
-      p.processor.analyzeRealtime();
-    });
-
-    if(inc > 0) dataFrameLen = data.session[inc].timestamp - data.session[inc-1].timestamp;
-    simulationBuffer.push(data.session[inc]);
-    inc++;
-  }
-
-
-  function reset(){
-    //Reset Simulator
-    timeOffsetAccumulator = 0;
-    inc = 0;
-    //Reset Processors
-    processors.forEach((p) => p.processor.resetProcessor());
-  }
-  
-  const simulatorSession = {
-    get increment(){return increment},
-    get currentIndex(){return inc},
-    get setDataPos(){return (pos) => {inc = pos < data.session.length ? pos : inc}},
-    get dataPos(){return inc},
-    get loadPreset(){return function(simPreset){
-      processors = simPreset.processors;
-      setupProcessors();
-      render = simPreset.render;
-      preset = simPreset;
-    }},
-    get play(){return () => {
-      active = true;
-      preset.onActivate();
-    }},
-    get stop(){return () => {
-      active = false;
-      preset.onDeactivate();
-    }},
-    get render(){return function(){
-      if(render) render(simulationBuffer);
-    }},
-    get reset(){return reset}
-  }
-
-  return simulatorSession;
-}
- */

@@ -1,5 +1,21 @@
 /*-----------------------LOW LEVEL PROCESSORS------------------------*/
 
+//PROCESSOR SETTINGS//
+const defaultPeakSettings = {
+  framesUntilPeakConfirm: 2,
+  frameCooldownThresh: 10,
+  hiMode: {peakThresh: 5, resetThresh: 1},
+  loMode: {peakThresh: -5, resetThresh: -1},
+  //Predictive Settings
+  //usePrediction: false,
+  //predictionThresh...
+}
+
+const defaultZeroCrossingSettings = {
+  resetThreshold: 4,
+  zeroCrossingThreshold: 0.1
+}
+
 //BASE PROCESSOR//
 function createLowLevelProcessor(){
     //Parent Session
@@ -105,7 +121,7 @@ function createLowLevelChild(settings, listeners){
 }
 
 //Peak Processor//
-function createLowLevelChildPEAK(peakAnalyzerSettings, listeners){
+function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     const base = createLowLevelProcessor();
 
     ///////////////////VARS///////////////////////
@@ -231,7 +247,7 @@ function createLowLevelChildPEAK(peakAnalyzerSettings, listeners){
 }
 
 //Zero Crossing Processor//
-function createLowLevelChildZXING(zeroCrossSettings, listeners){
+function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     const base = createLowLevelProcessor();
 
     ///////////////////VARS///////////////////////
@@ -299,3 +315,189 @@ function createLowLevelChildZXING(zeroCrossSettings, listeners){
 
 
 /*----------------------HIGH LEVEL PROCESSORS-----------------------*/
+
+
+//---------------------------------Data Processing & Analyzers-------------------------------------
+
+function createTempoAnalyzer(settings, listeners){
+  //Output:
+  //time since last step
+  //avg time over last X steps
+  //avg time total
+  //estimated BPM last, X steps, total
+  //running average
+
+  const runningAverageBucket = []
+  let runningAverageTime = -1;
+  let estimatedBPM = -1;
+  let fluctuation = 0; //If fluctuation too high bpm is not reliable, also good if we want to wait until stable value
+
+  //Pause function for when RUN_STATE changes (STOPPED, OTHER), timeout thresh in settings...
+}
+
+function createRunningFootAnalyzer(settings, listeners){
+  //Output: FOOT_STATES
+  
+  //This is easy to detect with X ROT data, for each acceleration peak the rotation peak switches polarity
+  //All we have to do is look at the previous X ROT peak to know wheather it was a left or right step
+
+  //Total right/ left steps
+  //Right/ left events
+
+  //Only turn on when it's time
+  let active = false;
+
+  //Parent Session
+  let parentSession;
+  let dataFilter;
+  let parentSessionData;
+
+  //Incremented Parent Buffer
+  let index;
+
+  function setupProcessor(parent, keys, sessionData){
+    parentSession = parent;
+    parentSessionData = sessionData;
+    dataFilter = keys;
+
+    //parentSession.getAccelerationProcessor()
+    //WE could just add an event listener to X ROT peak detector...
+  }
+
+  function analyzeRealtime(){
+    index = parentSession.currentIndex;
+
+    //Find previous X ROT Peak 
+  }
+
+  return {
+    get analyzeRealtime(){return analyzeRealtime},
+    get setupProcessor(){return setupProcessor}
+  }
+}
+
+function createRunWalkAnalyzer(settings, listeners){
+  //Output: RUN_STATES
+  //Detect if there is no flight stage? Generation/ loading response thresholds?
+
+  //There is a really clear pattern in the X ROT data when walking, graph in the sanbox to see
+}
+
+function createThresholdAnalyzer(settings, listeners){
+  //-Basic thresholds
+  //threshold enter, stay, exit events
+}
+
+
+//-----Hi Level
+//Combine multiple analyzers to do more complex detections
+//May need to make inferences with data from multiple analysis
+//left right foot
+//time between peaks
+//impact consistency (current vs average)
+//Stride distance?
+//etc...
+
+//States (State machine...)
+//Run, walk, stopped, other
+
+
+//Right, left foot
+//time between steps
+//flight time
+//impact consistency (current vs average)
+//...
+
+//Run State
+//Left 1,2,3,4, Right 1,2,3,4 (interpolate to find preload etc...)
+
+//Tempo, Speed
+//Store the average peak to peak time over last X peaks
+//Can be used to calculate BPM, interpolate timing between events, sonify if running at desired pace
+
+//Variable Settings
+//By analyzing impact forces over last X frames we can adjust analyzer settings & presets
+//Also good for predicting next event before it happens
+
+//Micro ML
+//Can we create extremely small local models for simple event prediction?
+//Can learn in realtime by comparing predictions to actual sensor results
+
+
+
+
+function createInitialRunningAnalyzerData(){
+  return {
+    runState: RUN_STATES.DEFAULT,
+    footState: FOOT_STATES.DEFAULT,
+    gaitState: RUN_GAIT_STATES.DEFAULT,
+    totalTime: 0,
+    runTime: 0,
+    totalSteps: 0,
+    leftSteps: 0,
+    rightSteps: 0,
+  }
+}
+
+function createRunningAnalyzer(){
+  //######Outline########//
+
+  //Necessary Low Level Analyzers
+  //--Required for basic functionality--//
+
+  //Optional Low Level Analyzers
+  //--For extra modulation or events--//
+
+  //Hybrid State Logic & Analyzers
+  //--High level analysis that cannot be performed by a single low level analyzer alone--//
+  //runSteps = onPeakEvent && RUN_STATE.RUNNING : increment
+  //leftSteps = onPeakEvent && RUN_STATE.RUNNING && FOOT_STATES.LEFT_FOOT
+
+  //High Level Listeners
+  //--Triggered by high level state changes--//
+
+  //Low Level Listeners
+  //--Triggered by low level state changes--//
+
+  //######End Outline########//
+
+
+  //Total steps can be grabbed from the length of the acceleration x peak data
+
+
+  const runningData = createInitialRunningAnalyzerData();
+
+
+  const peakAnalyzer = createPeakAnalyzer();
+
+
+}
+
+//Pass high & low level states down
+//Optional analysers
+//Activity Analyser (Run, walk, dance, etc...) -> Mapping -> Sound/ Music
+
+
+//Peak frequency analyzer, other data, time between steps etc...
+
+
+
+
+/*
+//STATES STATES STATES//
+
+There will be a lot of high level logic to piece together logic
+
+-When do we start counting steps?
+-Keeping track of step count while walking, jogging, running etc... also where they right or left steps?
+-Callibration (especially for rotation) to find null axis
+-Lots of thresholds, peak amplitudes, time between steps, etc... for determining current state (think intervals, warmup, adhering to goals, etc...)
+
+GESTURES
+-Gesture system for controlling application with sound/ voice feedback
+-Jump 3 times, lean left/ right, lean forward for 2 seconds etc...
+
+//Papers about the interface, application and design itself?
+
+
+*/
