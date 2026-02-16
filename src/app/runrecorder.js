@@ -20,7 +20,7 @@ sonificationPresets.addEventListener("change", () => {
   currentSimPreset?.onDeactivate();
   currentSimPreset = MobileAppProcessors[ind].simulatorSession;
   currentSession = createSession();
-  procArr.forEach((proc) => currentSession.connectRealtimeProcessor(proc.processor, proc.sensorType, proc.axis));
+  procArr.forEach((proc) => currentSession.connectLowLevelProcessor(proc.processor, proc.processorType, proc.sensorType, proc.dataType));
 });
 
 
@@ -70,28 +70,7 @@ function initializeAppUX(){
 }
 
 
-function recordData(){
-  if(!recordingOn) return;
-  currentSession.recordData({
-    acceleration: {x:accelerationX, y:accelerationY, z:accelerationZ},
-    rotation: {x:rotationX, y:rotationY, z:rotationZ}
-  });
-}
 
-
-function requestSensorPermission() {
-  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-    alert("enter"); //Do we need this?
-    DeviceMotionEvent.requestPermission()
-      .then((response) => {
-        alert("resp" + response);
-        if (response == "granted") {
-          //do we need to do anything here or is this enough
-          //for p5 to take over and start working?
-        }
-      }).catch(console.error);
-  } //else-> DeviceMotionEvent is not defined
-}
 
 /*         
  window.addEventListener("devicemotion", (e) => {
@@ -99,26 +78,3 @@ function requestSensorPermission() {
             console.log(e);
           });
  */
-
-
-/*
-const listeners = {
-  onHiPeakEvents: [() => testSound1.play()],
-  onLoPeakEvents: [() => testSound2.play()]
-}
-
-//Maps to Y in belt
-const peakXProcessor = createPeakAnalyzer(defaultPeakSettings, listeners);
-currentSession.connectRealtimeProcessor(peakXProcessor, "acc", "x");
-buffers.push(peakXProcessor);
-
-//Maps to X in belt
-const peakYProcessor = createPeakAnalyzer(defaultPeakSettings, listeners);
-currentSession.connectRealtimeProcessor(peakYProcessor, "acc", "y");
-buffers.push(peakYProcessor);
-
-//Still Z
-const peakZProcessor = createPeakAnalyzer(defaultPeakSettings, listeners);
-currentSession.connectRealtimeProcessor(peakZProcessor, "acc", "z");
-buffers.push(peakZProcessor)
-*/

@@ -1,5 +1,6 @@
 MobileAppProcessors = [];
 
+/*
 //Footstep template
 function createFootstepPreset(options){
     const {
@@ -229,3 +230,5 @@ MobileAppProcessors.push({
     name: gravelReactorAmbienceSession.name
 });
 
+
+*/
