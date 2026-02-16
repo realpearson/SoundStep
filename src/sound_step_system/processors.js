@@ -24,6 +24,8 @@ function createLowLevelProcessor(){
     let sensorType;
     let dataType;
     let processorType; //To be seen if necessary...
+
+    let callibrationOffset = 0;
     
     //Iterated Buffers
     let currentIndex;
@@ -74,6 +76,7 @@ function createLowLevelProcessor(){
       get processorData(){return processorData},
       get sensorType(){return sensorType},
       get dataType(){return dataType},
+      get callibrationOffset(){return callibrationOffset},
       get currentIndex(){return currentIndex},
       get currentValue(){return currentValue},
       //Does child need sensor or data types?
@@ -86,6 +89,7 @@ function createLowLevelProcessor(){
       get handle(){return {
         get analyzeRealtime(){return analyzeRealtime},
         //get analyzeOffline(){return analyzeOffline},
+        set callibrationOffset(val){callibrationOffset = val},
         get processorData(){return processorData},
         get resetProcessor(){return resetProcessor},
         get setupProcessor(){return setupProcessor},
