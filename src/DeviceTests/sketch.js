@@ -46,17 +46,18 @@ function createRotationTester(){
   rotateX and rotateY values.*/
   
   window.addEventListener("deviceorientation", (ev)=> {
-    currentOrientation.z = ev.alpha;
-    currentOrientation.x = ev.gamma;
-    currentOrientation.y = ev.beta;
+    currentOrientation.z = ev.alpha; // 0 (inclusive) to 360 (exclusive)
+    currentOrientation.x = ev.gamma; //-90 (inclusive) to 90 (exclusive). This represents a left to right motion of the device.
+    currentOrientation.y = ev.beta; // -180 (inclusive) to 180 (exclusive). This represents a front to back motion of the device.
   });
   
   function makeRect(axis, rectColor){
     let posY = 0;
     let posX = 0;
-    let mult = 50;
+    let mult = 10;
     let offset = 80;
     let val;
+    let rawVal;
 
     function render(){
       strokeWeight(1);
@@ -74,16 +75,16 @@ function createRotationTester(){
     function update(){
       switch(axis){
         case "x":
-          posY = currentOrientation.x * mult;
+          posY = ((currentOrientation.x + 90) * 2) / mult;
           val = Math.floor(currentOrientation.x * 100)/1000;
           break;
         case "y":
-          posY = currentOrientation.y * mult;
+          posY = (currentOrientation.y + 180) / mult;
           posX = 70;
           val = Math.floor(currentOrientation.y * 100)/1000;
           break;
         case "z":
-          posY = currentOrientation.z * mult;
+          posY = currentOrientation.z / mult;
           posX = 140;
           val = Math.floor(currentOrientation.z * 100)/1000;
           break;
@@ -108,3 +109,7 @@ function createRotationTester(){
 }
 
 
+/* Add this
+DeviceOrientationEvent.absolute Read only
+A boolean that indicates whether or not the device is providing orientation data absolutely.
+ */
