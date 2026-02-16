@@ -54,7 +54,7 @@ function createRotationTester(){
   function makeRect(axis, rectColor){
     let posY = 0;
     let posX = 0;
-    let mult = 10;
+    let mult = 0.5;
     let offset = 80;
     let val;
     let rawVal;
@@ -75,18 +75,18 @@ function createRotationTester(){
     function update(){
       switch(axis){
         case "x":
-          posY = ((currentOrientation.x + 90) * 2) / mult;
-          val = Math.floor(currentOrientation.x * 100)/1000;
+          posY = ((currentOrientation.x + 90) * 2) * mult;
+          val = Math.floor(currentOrientation.x * 100)/100;
           break;
         case "y":
-          posY = (currentOrientation.y + 180) / mult;
+          posY = (currentOrientation.y + 180) * mult;
           posX = 70;
-          val = Math.floor(currentOrientation.y * 100)/1000;
+          val = Math.floor(currentOrientation.y * 100)/100;
           break;
         case "z":
-          posY = currentOrientation.z / mult;
+          posY = currentOrientation.z * mult;
           posX = 140;
-          val = Math.floor(currentOrientation.z * 100)/1000;
+          val = Math.floor(currentOrientation.z * 100)/100;
           break;
       }
     }
