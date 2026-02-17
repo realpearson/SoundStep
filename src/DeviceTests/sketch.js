@@ -2,9 +2,7 @@ let rotationTester;
 
 
 function setup() {
-  createCanvas(300, 300);
-  rectMode(CENTER);
-  textAlign(CENTER);
+
   rotationTester = createRotationTester();
 
 }
@@ -33,6 +31,12 @@ function createRotationTester(){
   rects.push(makeRect("y", green));
   rects.push(makeRect("z", blue));
 
+  let canvasElement = document.getElementById("device_test_canvas");
+  let cnv = createCanvas(300, 300, canvasElement);
+  cnv.center();
+  rectMode(CENTER);
+  textAlign(CENTER);
+
 
   const currentOrientation = {
     x: 0,
@@ -54,7 +58,7 @@ function createRotationTester(){
   function makeRect(axis, rectColor){
     let posY = 0;
     let posX = 0;
-    let mult = 0.5;
+    let mult = 0.25;
     let offset = 80;
     let val;
     let rawVal;
@@ -69,7 +73,7 @@ function createRotationTester(){
       text(axis, posX + offset, height/2 + posY);
       noStroke();
       //text(val, posX + offset, height/2 + posY + 20)
-      text(val, posX + offset, height/2 + 20)
+      text(val, posX + offset, height/2 + 20 + posY)
     }
 
     function update(){
