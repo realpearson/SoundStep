@@ -4,7 +4,10 @@ let rotationTester;
 function setup() {
 
   rotationTester = createRotationTester();
-
+  
+  document.getElementById("permissions").addEventListener("mousedown", ()=> {
+    requestPreventScreenLock();
+  });
 }
 
 function draw() {
@@ -15,6 +18,7 @@ function draw() {
 function mousePressed(){
   let fs = fullscreen();
   fullscreen(!fs);
+  cnv.center();
 }
 
 
@@ -37,23 +41,6 @@ function createRotationTester(){
   rectMode(CENTER);
   textAlign(CENTER);
 
-
-  const currentOrientation = {
-    x: 0,
-    y: 0,
-    z: 0
-  }
-  
-  //https://developer.mozilla.org/en-US/docs/Web/API/Device_orientation_events/Using_device_orientation_with_3D_transforms
-  /*The easiest way to convert orientation data to a 3D transform 
-  is basically to use the alpha, gamma, and beta values as rotateZ, 
-  rotateX and rotateY values.*/
-  
-  window.addEventListener("deviceorientation", (ev)=> {
-    currentOrientation.z = ev.alpha; // 0 (inclusive) to 360 (exclusive)
-    currentOrientation.x = ev.gamma; //-90 (inclusive) to 90 (exclusive). This represents a left to right motion of the device.
-    currentOrientation.y = ev.beta; // -180 (inclusive) to 180 (exclusive). This represents a front to back motion of the device.
-  });
   
   function makeRect(axis, rectColor){
     let posY = 0;
@@ -79,18 +66,18 @@ function createRotationTester(){
     function update(){
       switch(axis){
         case "x":
-          posY = ((currentOrientation.x + 90) * 2) * mult;
-          val = Math.floor(currentOrientation.x * 100)/100;
+          posY = ((deviceSensorHandler.rotationX + 90) * 2) * mult;
+          val = Math.floor(deviceSensorHandler.rotationX * 100)/100;
           break;
         case "y":
-          posY = (currentOrientation.y + 180) * mult;
+          posY = (deviceSensorHandler.rotationY + 180) * mult;
           posX = 70;
-          val = Math.floor(currentOrientation.y * 100)/100;
+          val = Math.floor(deviceSensorHandler.rotationY * 100)/100;
           break;
         case "z":
-          posY = currentOrientation.z * mult;
+          posY = deviceSensorHandler.rotationZ * mult;
           posX = 140;
-          val = Math.floor(currentOrientation.z * 100)/100;
+          val = Math.floor(deviceSensorHandler.rotationZ * 100)/100;
           break;
       }
     }

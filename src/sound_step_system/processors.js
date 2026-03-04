@@ -23,6 +23,7 @@ function createLowLevelProcessor(){
     let parentSessionData;
     let sensorType;
     let dataType;
+    let maxLatency = 0;
     let processorType; //To be seen if necessary...
 
     let callibrationOffset = 0;
@@ -40,7 +41,6 @@ function createLowLevelProcessor(){
   
     //Data
     const processorData = new Map();
-  
   
     function analyzeRealtime(){
       currentIndex = parentSession.currentIndex;
@@ -79,6 +79,7 @@ function createLowLevelProcessor(){
       get callibrationOffset(){return callibrationOffset},
       get currentIndex(){return currentIndex},
       get currentValue(){return currentValue},
+      set maxLatency(val){maxLatency = val},
       //Does child need sensor or data types?
   
       //Child Implements
@@ -93,6 +94,7 @@ function createLowLevelProcessor(){
         get processorData(){return processorData},
         get resetProcessor(){return resetProcessor},
         get setupProcessor(){return setupProcessor},
+        get maxLatency(){return maxLatency},
       }},
     }
 }
@@ -127,6 +129,7 @@ function createLowLevelChild(settings, listeners){
 //Peak Processor//
 function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     const base = createLowLevelProcessor();
+    base.maxLatency = peakAnalyzerSettings.framesUntilPeakConfirm +1;
 
     ///////////////////VARS///////////////////////
     //Events
@@ -253,7 +256,7 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
 //Zero Crossing Processor//
 function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     const base = createLowLevelProcessor();
-
+    base.maxLatency = 1;
     ///////////////////VARS///////////////////////
     //Events
     zeroCrossingListeners = listeners;
@@ -264,6 +267,7 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     //Internal Buffers
     let zeroCrossingCandidateIndex = -1;
     let resetMet = false;
+    let latencyCompensationBuffer = {frames:0, payload: null};
     const data = [];
 
     ////////////////CHILD FUNCS/////////////////////
@@ -275,8 +279,7 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
         
         //Zero crossing between frames
         if(resetMet && (Math.sign(data[1]) != Math.sign(data[0]))){
-          if(Math.abs(data[1]) < Math.abs(data[0])) zeroCrossingCandidateIndex = index;
-          else zeroCrossingCandidateIndex = index-1;
+          Math.abs(data[1]) < Math.abs(data[0]) ? zeroCrossingCandidateIndex = index : index-1;
           confirmZeroCrossing();
         }
     
@@ -287,13 +290,28 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     
       function confirmZeroCrossing(){
         resetMet = false;
-        //console.log(base.parentSessionData[base.parentSession.currentIndex][base.sensorType][base.dataType]);
-        //console.log(base.parentSession.currentIndex);
-        //console.log(zeroCrossingCandidateIndex)
+        
         base.processorData.set(zeroCrossingCandidateIndex, base.parentSessionData[zeroCrossingCandidateIndex][base.sensorType][base.dataType]);
+        
         const zeroCrossObj = {index: zeroCrossingCandidateIndex, value: base.processorData.get(zeroCrossingCandidateIndex), parentSession: base.parentSession};
-        zeroCrossingListeners?.forEach((listener) => {listener(zeroCrossObj)});
+        
+        //zeroCrossingListeners?.forEach((listener) => {listener(zeroCrossObj)}); 
+        //Latency Compensation
+        latencyCompensationBuffer.payload = zeroCrossObj;
+        latencyCompensationBuffer.frames = Math.abs(data[1]) < Math.abs(data[0]) ? 0 : 1;
+        
         zeroCrossingCandidateIndex = -1;
+      }
+
+
+      function checkForLatency(){
+        if(latencyCompensationBuffer.payload == null) return;
+        if(latencyCompensationBuffer.frames >= base.parentSession.globalLatency){
+          zeroCrossingListeners?.forEach((listener) => {listener(zeroCrossObj)});
+          latencyCompensationBuffer = {frames:0, payload: null};
+          return;
+        }
+        latencyCompensationBuffer.frames++;
       }
 
     ///////////////OVERRIDE FUNCS///////////////////
@@ -308,9 +326,8 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     base.analyzeRealtimeChild = function(index, value){
         if(data.length > 1) data.splice(0, 1);
         data.push(value);
-        //console.log(value);
-        //console.log(index)
         analyze(index);
+        checkForLatency();
     }
 
     return base.handle;

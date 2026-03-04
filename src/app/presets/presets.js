@@ -114,6 +114,7 @@ function createAsphaltSimulatorSession(){
 }
 
 const asphaltSimulatorPreset = createAsphaltSimulatorSession();
+
 MobileAppProcessors.push({
     simulatorSession: asphaltSimulatorPreset, 
     processorArray: asphaltSimulatorPreset.processors, 

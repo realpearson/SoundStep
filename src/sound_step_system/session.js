@@ -1,7 +1,8 @@
 //---------------------STATES & TYPES----------------------//
 const SENSOR_TYPES = {
   ACCELERATION: "acceleration",
-  ROTATION: "rotation", //Gyro?
+  ROTATION: "rotation",
+  GYRO: "gyro",
   PRESSURE: "pressure"
 }
 
@@ -58,6 +59,7 @@ function createSession(params){
   
   let globalData = null;
   //GLOBAL LATENCY (based on max latency of processor, ex peak proc @ 2 or 3 frames)
+  let globalLatency = 0;
 
   //Low Level Processors : Reads only raw data, does not depend on any other processor
   const lowLevelProcessors = new Map();
@@ -68,6 +70,7 @@ function createSession(params){
     processor.setupProcessor(session, sessionData, sensorType, dataType);
     if(lowLevelProcessors.get(name)) console.warn(`Replacing existing processor with name: ${name}`);
     lowLevelProcessors.set(name, {processor, processorType, sensorType, dataType, name});
+    if(processor.maxLatency > globalLatency) globalLatency = maxLatency;
     return name;
   }
 
@@ -113,18 +116,16 @@ function createSession(params){
       //Header Data
       timestamp,
       index: currentIndex,
-      //GET SENSOR DATA W/O P5 VARS!
-      /*
-      acceleration: {x:accelerationX, y:accelerationY, z:accelerationZ},
-      rotation: {x:rotationX, y:rotationY, z:rotationZ},
-      pressure: {pressureValue: 0},
-      */
+      
+      acceleration: {x:deviceSensorHandler.accelertationX, y:deviceSensorHandler.accelerationY, z:deviceSensorHandler.accelerationZ},
+      gyro:{x:deviceSensorHandler.rotationRateX, y:deviceSensorHandler.rotationRateY, z:deviceSensorHandler.rotationRateZ},
+      moveEventInterval: deviceSensorHandler.moveEventInterval,
+      rotation: {x:deviceSensorHandler.rotationX, y:deviceSensorHandler.rotationY, z:deviceSensorHandler.rotationZ},
+      
 
       //Mock Data
-      acceleration: {X:mockX(), Y:mockY(), Z:mockZ()},
-      rotation: {X:random(-10, 10), Y:random(-10, 10), X:random(-10, 10)},
-      //Pressure data
-      //metaData: {}
+      //acceleration: {X:mockX(), Y:mockY(), Z:mockZ()},
+      //rotation: {X:random(-10, 10), Y:random(-10, 10), X:random(-10, 10)},
     }
 
     //Store Raw Data
@@ -154,13 +155,14 @@ function createSession(params){
     get connectLowLevelProcessor(){return connectLowLevelProcessor},
     //get clearRealtimeProcessors(){return () => axialSensorProcessors.length = 0} //NEEDS TO BE REDONE...
     get currentIndex(){return currentIndex},
+    get globalLatency(){return globalLatency},
   }
 
   return session;
 }
 
 
-//Helper for creating mock data for tests
+//Helpers for creating mock data for tests
 function createMockSinData(){
   let theta = ((Math.random()-0.5) * 2) * Math.PI;
   return function(){

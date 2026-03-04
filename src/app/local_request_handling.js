@@ -1,18 +1,105 @@
-//---------------------------------Device Permissions-------------------------------------//
-function requestSensorPermission() {
+//Handle for releasing screen lock //https://developer.mozilla.org/en-US/docs/Web/API/WakeLockSentinel
+let waitLockSentinal = null;
+
+function requestPreventScreenLock(){
+  const wakeLock = navigator.wakeLock.request("screen").then((response) => {
+    debugResponse(response);
+    waitLockSentinal = response;
+  }).catch(debugError);
+}
+
+let htmlDebug = false;
+
+function debugError(error){
+  console.error(error);
+  if(!htmlDebug) return;
+  const debugDiv = document.getElementById("debug_div");
+  const textNode = document.createTextNode(`${error.name}, ${error.message}`);
+  debugDiv.appendChild(textNode);
+}
+
+function debugResponse(response){
+  console.log(response);
+  if(!htmlDebug) return;
+  const debugDiv = document.getElementById("debug_div");
+  const textNode = document.createTextNode(`response: ${response}, type: ${response.type}`);
+  debugDiv.appendChild(textNode);
+}
+
+
+//---------------------------------Sensor Events-------------------------------------//
+
+//Some kind of object to house all these values...
+function createDeviceSensorHandler(){
+
+  //Device Motion Buffers
+  let accelerationX = 0;
+  let accelerationY = 0;
+  let accelerationZ = 0;
+
+  let moveEventInterval = -1;
+
+  let rotationRateX = 0;
+  let rotationRateY = 0;
+  let rotationRateZ = 0;
+
+  //Device Orientation Buffers
+  //Should we offset these like in p5 to make them all -180-180?
+  let rotationX = 0;
+  let rotationY = 0;
+  let rotationZ = 0;
+
+
   if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-    alert("enter"); //Do we need this?
     DeviceMotionEvent.requestPermission()
       .then((response) => {
-        alert("resp" + response);
         if (response == "granted") {
-          //do we need to do anything here or is this enough
-          //for p5 to take over and start working?
+          window.addEventListener("devicemotion", (event)=> {
+            accelerationX = event.acceleration.x;
+            accelerationY = event.acceleration.y;
+            accelerationZ = event.acceleration.z;
+            moveEventInterval = event.interval;
+            rotationRateX = event.rotationRate.alpha;
+            rotationRateY = event.rotationRate.gamma;
+            rotationRateZ = event.rotationRate.beta;
+          });
         }
       }).catch(console.error);
   } //else-> DeviceMotionEvent is not defined
+
+  if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+    DeviceOrientationEvent.requestPermission()
+      .then((response) => {
+        if (response == "granted") {
+          window.addEventListener("deviceorientation", (event)=> {
+            rotationX = event.alpha; // 0 (inclusive) to 360 (exclusive)
+            rotationY = event.gamma; //-90 (inclusive) to 90 (exclusive). Left to right motion of the device.
+            rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
+          });
+        }
+      }).catch(console.error);
+  } //else-> DeviceMotionEvent is not defined
+
+
+  //Dispose, return different object/ error if permissions failed or events are undefined?
+
+  return {
+    //Device Motion
+    get accelerationX(){return accelerationX},
+    get accelerationY(){return accelerationY},
+    get accelerationZ(){return accelerationZ},
+    get rotationRateX(){return rotationRateX},
+    get rotationRateY(){return rotationRateY},
+    get rotationRateZ(){return rotationRateZ},
+    get moveEventInterval(){return moveEventInterval},
+    //Device Orientation
+    get rotationX(){return rotationX},
+    get rotationY(){return rotationY},
+    get rotationZ(){return rotationZ},
+  }
 }
 
+const deviceSensorHandler = createDeviceSensorHandler();
 
 
 //---------------------------------Import Export Data-------------------------------------//
@@ -27,8 +114,6 @@ function exportData(data){
   //console.log(a.parentNode)
   //document.removeChild(a);
 }
-
-
 
 //Upload local RUN data from COMPUTER FINDER
 function uploadData(onUploaded) {
@@ -62,9 +147,6 @@ function onImportData(data){
   simulator = createSimulator(data);
   //simulator.setDataPos(450);
 }
-
-
-
 
 //Upload local RUN data FROM PROJECT FOLDER to sandbox mode
 async function fetchLocalData(event){

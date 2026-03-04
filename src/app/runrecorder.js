@@ -63,18 +63,8 @@ function initializeAppUX(){
   };
 
   //iOS Sensor Data Permission Handling
-  recordBttn.addEventListener("mousedown", requestSensorPermission, {once:true});
+  //recordBttn.addEventListener("mousedown", requestSensorPermission, {once:true});
 
   sonificationPresets.style.left = `${windowWidth/4}px`;
   sonificationPresets.style.top = `${windowHeight/1.5}px`;
 }
-
-
-
-
-/*         
- window.addEventListener("devicemotion", (e) => {
-            // do something with e
-            console.log(e);
-          });
- */
