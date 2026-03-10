@@ -65,6 +65,7 @@ function draw() {
     
     stroke(255);
     strokeWeight(2)
+    text("updated", 10, 380);
     text(deviceSensorHandler.accelerationX, 10, 400);
     text(deviceSensorHandler.accelerationY, 10, 430);
     text(deviceSensorHandler.accelerationZ, 10, 460);
