@@ -54,31 +54,35 @@ function createDeviceSensorHandler(){
     DeviceMotionEvent.requestPermission()
       .then((response) => {
         if (response == "granted") {
-          window.addEventListener("devicemotion", (event)=> {
-            accelerationX = event.acceleration.x;
-            accelerationY = event.acceleration.y;
-            accelerationZ = event.acceleration.z;
-            moveEventInterval = event.interval;
-            rotationRateX = event.rotationRate.alpha;
-            rotationRateY = event.rotationRate.gamma;
-            rotationRateZ = event.rotationRate.beta;
-          });
+
         }
-      }).catch(console.error);
+      }).catch(alert);
   } //else-> DeviceMotionEvent is not defined
 
   if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
     DeviceOrientationEvent.requestPermission()
       .then((response) => {
         if (response == "granted") {
-          window.addEventListener("deviceorientation", (event)=> {
-            rotationX = event.alpha; // 0 (inclusive) to 360 (exclusive)
-            rotationY = event.gamma; //-90 (inclusive) to 90 (exclusive). Left to right motion of the device.
-            rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
-          });
+
         }
-      }).catch(console.error);
+      }).catch(alert);
   } //else-> DeviceMotionEvent is not defined
+
+  window.addEventListener("devicemotion", (event)=> {
+    accelerationX = event.acceleration.x;
+    accelerationY = event.acceleration.y;
+    accelerationZ = event.acceleration.z;
+    moveEventInterval = event.interval;
+    rotationRateX = event.rotationRate.alpha;
+    rotationRateY = event.rotationRate.gamma;
+    rotationRateZ = event.rotationRate.beta;
+  });
+  
+    window.addEventListener("deviceorientation", (event)=> {
+    rotationX = event.alpha; // 0 (inclusive) to 360 (exclusive)
+    rotationY = event.gamma; //-90 (inclusive) to 90 (exclusive). Left to right motion of the device.
+    rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
+  });
 
 
   //Dispose, return different object/ error if permissions failed or events are undefined?
