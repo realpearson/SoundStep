@@ -117,10 +117,10 @@ function createSession(params){
       timestamp,
       index: currentIndex,
       
-      acceleration: {x:deviceSensorHandler.accelertationX, y:deviceSensorHandler.accelerationY, z:deviceSensorHandler.accelerationZ},
-      gyro:{x:deviceSensorHandler.rotationRateX, y:deviceSensorHandler.rotationRateY, z:deviceSensorHandler.rotationRateZ},
+      acceleration: {X:deviceSensorHandler.accelertationX, Y:deviceSensorHandler.accelerationY, Z:deviceSensorHandler.accelerationZ},
+      gyro:{X:deviceSensorHandler.rotationRateX, Y:deviceSensorHandler.rotationRateY, Z:deviceSensorHandler.rotationRateZ},
       moveEventInterval: deviceSensorHandler.moveEventInterval,
-      rotation: {x:deviceSensorHandler.rotationX, y:deviceSensorHandler.rotationY, z:deviceSensorHandler.rotationZ},
+      rotation: {X:deviceSensorHandler.rotationX, Y:deviceSensorHandler.rotationY, Z:deviceSensorHandler.rotationZ},
       
 
       //Mock Data
