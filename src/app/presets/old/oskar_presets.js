@@ -1,7 +1,3 @@
-
-
-/*
-
 function createReactorSimulatorSession(){
     //Setup Sounds
     const soundAddress = "assets/audio_files/Footsteps/Footstep Reactor asphalt ";
@@ -1169,4 +1165,3 @@ MobileAppProcessors.push({
     name: "Run Music"
 });
 
-*/

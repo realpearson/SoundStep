@@ -21,7 +21,9 @@ function mousePressed(){
   cnv.center();
 }
 
-
+function createCompassApp(){
+  //Create a little sonic compass app. Use 4 tones that represent cardinal directions and blend between tones for intermediate angles.
+}
 
 function createRotationTester(){
   
