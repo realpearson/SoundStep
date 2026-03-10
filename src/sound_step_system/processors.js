@@ -1,5 +1,5 @@
 /*-----------------------LOW LEVEL PROCESSORS------------------------*/
-
+let processorDebug = "";
 //PROCESSOR SETTINGS//
 const defaultPeakSettings = {
   framesUntilPeakConfirm: 2,
@@ -188,7 +188,7 @@ function createPeakAnalyzer(peakAnalyzerSettings, listeners){
     }
       
     function confirmPeak(){
-          
+        processorDebug = "Peak" + peakCandidateIndex;
         //INTERNAL DATA
         let peakValue = base.parentSessionData[peakCandidateIndex][base.sensorType][base.dataType];
         base.processorData.set(peakCandidateIndex, peakValue);
