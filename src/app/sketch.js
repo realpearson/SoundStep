@@ -65,9 +65,9 @@ function draw() {
     
     stroke(255);
     strokeWeight(2)
-    text(deviceSensorHandler.accelerationX || "null", 10, 400);
-    text(deviceSensorHandler.accelerationY || "null", 10, 430);
-    text(deviceSensorHandler.accelerationZ || "null", 10, 460);
+    text(deviceSensorHandler.accelerationX, 10, 400);
+    text(deviceSensorHandler.accelerationY, 10, 430);
+    text(deviceSensorHandler.accelerationZ, 10, 460);
     
     /*
     push();
