@@ -9,9 +9,13 @@ function createSimulator(data){
     //Internal Logic
     let active = false;
     let inc = 0;
-    let timeOffsetAccumulator = 0;
-    let dataFrameLen = deltaTime;//calcDataFR();
-    const discrepencyThreshold = 2;
+    //let timeOffsetAccumulator = 0;
+    //let dataFrameLen = 0;//calcDataFR();
+    
+
+    const discrepencyThreshold = 20;
+    let totalTimeElapsed = 0;
+    let dataTimeElapsed = 0;
   
     const simulationBuffer = [];
   
@@ -24,37 +28,38 @@ function setupProcessors(){
 }
   
 function increment(debug){
-      if(!active) return;
-      if(inc >= data.session.length-1) return;
+  if(!active) return;
+  if(inc >= data.session.length-1) return;
+
+  //if(inc %10 == 0) console.log(frameRate());
+  //if(inc > 0 && inc %10 == 0) console.log(data.session[inc].timestamp - data.session[inc-1].timestamp);
   
-      if(timeOffsetAccumulator > discrepencyThreshold){
-        //Insert extra frame to compensate
-        step(debug);
-        step(debug);
-        //timeOffsetAccumulator -= discrepencyThreshold * dataFrameLen;
-      } else if(timeOffsetAccumulator < -discrepencyThreshold * dataFrameLen){
-        //Skip frame to compensate
-        //timeOffsetAccumulator += discrepencyThreshold * dataFrameLen;
-      } else {
-        step(debug);
-      }
-  
+  if(totalTimeElapsed - dataTimeElapsed > discrepencyThreshold){
+    //Insert extra frame to compensate
+    step(debug);
+    step(debug);
+  } else if(totalTimeElapsed - dataTimeElapsed < -discrepencyThreshold){
+    //Skip frame to compensate
+  } else {
+    step(debug);
+  }
+  //Accumulate difference between target frame length and actual
+  if(inc > 0) dataTimeElapsed = data.session[inc].timestamp - data.session[0].timestamp;
+  totalTimeElapsed += deltaTime;
+     
 }
   
 function step(debug){
-      //Accumulate difference between target frame length and actual
-      timeOffsetAccumulator += deltaTime-dataFrameLen;
-      simulationBuffer.push(data.session[inc]);
-      session.simulateRecordData(data.session[inc]);
-  
-      if(inc > 0) dataFrameLen = data.session[inc].timestamp - data.session[inc-1].timestamp;
-      inc++;
+  simulationBuffer.push(data.session[inc]);
+  session.simulateRecordData(data.session[inc]);
+  inc++;
 }
   
   
 function reset(){
       //Reset Simulator
-      timeOffsetAccumulator = 0;
+      totalTimeElapsed = 0;
+      dataTimeElapsed = 0;
       inc = 0;
       //Reset Processors
       processors.forEach((p) => p.processor.resetProcessor());
