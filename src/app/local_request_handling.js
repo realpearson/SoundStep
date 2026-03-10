@@ -69,13 +69,13 @@ function createDeviceSensorHandler(){
   } //else-> DeviceMotionEvent is not defined
 
   window.addEventListener("devicemotion", (event)=> {
-    accelerationX = event.acceleration.x;
-    accelerationY = event.acceleration.y;
-    accelerationZ = event.acceleration.z;
+    accelerationX = event.acceleration.x || 0;
+    accelerationY = event.acceleration.y || 0;
+    accelerationZ = event.acceleration.z || 0;
     moveEventInterval = event.interval;
-    rotationRateX = event.rotationRate.alpha;
-    rotationRateY = event.rotationRate.gamma;
-    rotationRateZ = event.rotationRate.beta;
+    rotationRateX = event.rotationRate.alpha || 0;
+    rotationRateY = event.rotationRate.gamma || 0;
+    rotationRateZ = event.rotationRate.beta || 0;
   });
   
     window.addEventListener("deviceorientation", (event)=> {
