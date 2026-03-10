@@ -32,7 +32,7 @@ function increment(debug){
   if(inc >= data.session.length-1) return;
 
   //if(inc %10 == 0) console.log(frameRate());
-  //if(inc > 0 && inc %10 == 0) console.log(data.session[inc].timestamp - data.session[inc-1].timestamp);
+  if(inc > 0 && inc %10 == 0) console.log(`time discrepency: ${data.session[inc].timestamp - data.session[inc-1].timestamp} simulation framerate: ${frameRate()}`);
   
   if(totalTimeElapsed - dataTimeElapsed > discrepencyThreshold){
     //Insert extra frame to compensate
