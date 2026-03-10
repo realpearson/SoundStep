@@ -279,7 +279,7 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
         
         //Zero crossing between frames
         if(resetMet && (Math.sign(data[1]) != Math.sign(data[0]))){
-          Math.abs(data[1]) < Math.abs(data[0]) ? zeroCrossingCandidateIndex = index : index-1;
+          zeroCrossingCandidateIndex = Math.abs(data[1]) < Math.abs(data[0]) ? index : index-1;
           confirmZeroCrossing();
         }
     
@@ -290,7 +290,6 @@ function createZeroCrossingAnalyzer(zeroCrossSettings, listeners){
     
       function confirmZeroCrossing(){
         resetMet = false;
-        
         base.processorData.set(zeroCrossingCandidateIndex, base.parentSessionData[zeroCrossingCandidateIndex][base.sensorType][base.dataType]);
         
         const zeroCrossObj = {index: zeroCrossingCandidateIndex, value: base.processorData.get(zeroCrossingCandidateIndex), parentSession: base.parentSession};

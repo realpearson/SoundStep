@@ -70,7 +70,7 @@ function createSession(params){
     processor.setupProcessor(session, sessionData, sensorType, dataType);
     if(lowLevelProcessors.get(name)) console.warn(`Replacing existing processor with name: ${name}`);
     lowLevelProcessors.set(name, {processor, processorType, sensorType, dataType, name});
-    if(processor.maxLatency > globalLatency) globalLatency = maxLatency;
+    if(processor.maxLatency > globalLatency) globalLatency = processor.maxLatency;
     return name;
   }
 

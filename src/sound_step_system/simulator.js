@@ -27,7 +27,7 @@ function increment(debug){
       if(!active) return;
       if(inc >= data.session.length-1) return;
   
-      if(timeOffsetAccumulator > discrepencyThreshold * dataFrameLen){
+      if(timeOffsetAccumulator > discrepencyThreshold){
         //Insert extra frame to compensate
         step(debug);
         step(debug);
