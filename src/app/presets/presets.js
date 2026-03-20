@@ -336,15 +336,14 @@ function createRunMusicSimulatorSession(){
 
         return function(){
    
-            console.log("kick updated")
             if(counter == 1){drums.playSpecific(0);}
-            if(counter == 3){drums.playSpecific(0);}
+            if(counter == 3){drums.playSpecific(2);}
             if(counter == 6){drums.playSpecific(0);}
-            if(counter == 7){drums.playSpecific(0);}
-            if(counter == 11){drums.playSpecific(0);}
+            if(counter == 7){drums.playSpecific(2);}
+            if(counter == 11){drums.playSpecific(2);}
             if(counter == 12){drums.playSpecific(0);}
             if(counter == 14){drums.playSpecific(0);}
-            if(counter == 15){drums.playSpecific(0);}
+            if(counter == 15){drums.playSpecific(2);}
 
 
       
