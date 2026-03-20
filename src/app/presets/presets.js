@@ -1,4 +1,3 @@
-MobileAppProcessors = [];
 
 function createC1SimulatorSession(){
     //Setup Sounds
@@ -85,17 +84,6 @@ function createC1SimulatorSession(){
     }
 }
 
-const C1SimulatorPreset = createC1SimulatorSession();
-
-MobileAppProcessors.push({
-    simulatorSession: C1SimulatorPreset, 
-    processorArray: C1SimulatorPreset.processors, 
-    name: "C1 Heavy"
-});
-
-
-
-
 function createC2SimulatorSession(){
     //Setup Sounds
     
@@ -181,18 +169,6 @@ function createC2SimulatorSession(){
     }
 }
 
-const C2SimulatorPreset = createC2SimulatorSession();
-
-MobileAppProcessors.push({
-    simulatorSession: C2SimulatorPreset, 
-    processorArray: C2SimulatorPreset.processors, 
-    name: "C2 Light"
-});
-
-
-
-
-
 function createRunMusicSimulatorSession(){
     //Setup Sounds
 
@@ -234,40 +210,18 @@ function createRunMusicSimulatorSession(){
 
 
     //Samples
-    //Sub
-    let subA = new soundContainer("assets/audio_files/OskarMusic/Sub A.wav", audioCtx);
-    let subD = new soundContainer("assets/audio_files/OskarMusic/Sub A.wav", audioCtx);
-
-    //Pluck
-    const pluckPath = "assets/audio_files/CollabMusic/pluck/Collaborative pluck ";
-    let pluckAddresses = [];
-    for(let i = 0; i < 5; i++) pluckAddresses.push(pluckPath + (i +1) + ".wav");
-    const plucks = createRandomizer(pluckAddresses);
-
-    //Bleep/Pluck
-    const bleepPath = "assets/audio_files/CollabMusic/bleep/Collaborative bleep ";
-    let bleepAddresses = [];
-    for(let i = 0; i < 12; i++) bleepAddresses.push(bleepPath + (i +1) + ".wav");
-    const bleeps = createRandomizer(bleepAddresses);
-
-   
-    //Chord
-    const chordPath = "assets/audio_files/CollabMusic/chord/Collaborative chord ";
-    let chordAddresses = [];
-    for(let i = 0; i < 10; i++) chordAddresses.push(chordPath + (i +1) + ".wav");
-    const chords = createRandomizer(chordAddresses);
 
     //Bass
-    const bassPath = "assets/audio_files/CollabMusic/bass/Collaborative bass ";
+    const bassPath = "assets/audio_files/Study/C3/Bass/Bass ";
     let bassAddresses = [];
-    for(let i = 0; i < 8; i++) bassAddresses.push(bassPath + (i +1) + ".wav");
+    for(let i = 0; i < 3; i++) bassAddresses.push(bassPath + (i +1) + ".wav");
     const bass = createRandomizer(bassAddresses);
 
-    //Pad
-    const padPath = "assets/audio_files/CollabMusic/pad/Collaborative pad ";
-    let padAddresses = [];
-    for(let i = 0; i < 4; i++) padAddresses.push(padPath + (i +1) + ".wav");
-    const pads = createRandomizer(padAddresses);
+    //Stab
+    const stabPath = "assets/audio_files/Study/C3/Stab/Stab ";
+    let stabAddresses = [];
+    for(let i = 0; i < 4; i++) stabAddresses.push(stabPath + (i +1) + ".wav");
+    const stab = createRandomizer(stabAddresses);
 
     //Perc
     const percPath = "assets/audio_files/CollabMusic/perc/Collaborative perc ";
@@ -289,133 +243,113 @@ function createRunMusicSimulatorSession(){
 
     //Triggers
 
-    //Synth
-    function createKickTrigger(){
-        let counter = 1;
+    let counter = 0;
+    let bar = 1;
 
+    function barCounter() {
         return function(){
-            if(counter > 4 ) counter = 1;
-            //if(counter % 2 === 0) synth1.playVoice1(audioContext.currentTime + audioContext.baseLatency);
-            //if(counter % 2 === 0) synth1.applyDynamicPatchChange({oscPitch: Math.random() * 400 + 100});
-            kickSynth.playVoice1(audioContext.currentTime);
-
-            counter++;
-        }
-    }
-
-    let kickTrig = createKickTrigger();
-
-    function createNoteGen(){
-        let counter = 1;
-
-        const freks = [295, 329.6, 370, 393];
-        
-
-        return function(){
-            if(counter > 4 ) counter = 1;
-            if(counter % 2 === 0) {
-                let note = freks[Math.floor(Math.random() * freks.length)];
-                if(Math.random() < 0.6) note /= 2;
-                let rate = note * 1.9;
-                console.log(note, rate);
-                synth1.playVoice1(audioContext.currentTime);
-                synth1.applyDynamicPatchChange({oscPitch: note, lfoRate: rate});
-                //const wave = Object.values(ES1_LFO_TYPES)[Math.floor(Math.random()*Object.values(ES1_LFO_TYPES).length)];
-                //synth1.applyDynamicPatchChange({lfoWave: wave});
-            }
-
-            
-
-            counter++;
-        }
-    }
-
-    let noteTrig = createNoteGen();
-
-    //Samples
-    let counter = 1;
-    let counter3 = 1
-
-    function chordTrigger(){
-        
-        return function(){
-            if(counter > 8 ) counter = 1;
-
-            if(counter <= 2){null;
-                //console.log(alternatePair(counter,0));
-            }
-            else if(counter > 2 && counter <= 5){null;
-                //console.log(alternatePair(counter,3));
-            }
-            else if(counter > 5 && counter <= 8){null;
-                //console.log(alternatePair(counter,6));
-            }
-            
             counter++
-            counter3++;
+            if(counter > 16 ) counter = 1, bar++;
+            if(bar > 4 ) bar = 1;
+            
+
         }
     }
 
-    function subTrigger(){
+    function bassTrigger(){
+        
 
         return function(){
-            if(counter > 8 ) counter = 1;
-            
-
-            if(counter == 1){subD.play();
+            console.log(counter)
+            console.log(counter == 1)
+            if(counter == 1 && bar == 1 ){bass.playSpecific(0);
+                console.log("hej")
+                
             }
-
-            counter++
+            if(counter == 1 && bar == 2){bass.playSpecific(1);
+            }
+            if(counter == 1 && bar == 3){bass.playSpecific(2);
+            }
+            if(counter == 1 && bar == 4){bass.playSpecific(2);
+               
+            }
         
             
         }
     }
 
-    function pluckTrigger(){
+    function stabTrigger(){
         
         
         return function(){
-            if(counter3 > 8 ) counter3 = 1;
 
-            if(counter == 2){plucks.playSpecific(0);
+            if (bar == 1) {
+            if(counter == 1){stab.playSpecific(0);
             }
-            if(counter == 3){plucks.playSpecific(1);
+            if(counter == 3){stab.playSpecific(0);
             }
-            if(counter == 4){plucks.playSpecific(2);
+
+            if(counter == 6){stab.playSpecific(0);
             }
-            if(counter == 6){plucks.playSpecific(3);
+            if(counter == 8){stab.playSpecific(0);
             }
-            if(counter == 8){plucks.playSpecific(4);
             }
-            
-            counter3++;    
+
+            if (bar == 2) {
+            if(counter == 1){stab.playSpecific(1);
+            }
+            if(counter == 3){stab.playSpecific(1);
+            }
+
+            if(counter == 6){stab.playSpecific(1);
+            }
+            if(counter == 8){stab.playSpecific(1);
+            }}
+
+            if (bar == 3) {
+            if(counter == 1){stab.playSpecific(2);
+            }
+            if(counter == 3){stab.playSpecific(2);
+            }
+        
+            if(counter == 6){stab.playSpecific(2);
+            }
+            if(counter == 8){stab.playSpecific(2);
+            }}
+
+            if (bar == 4) {
+            if(counter == 1){stab.playSpecific(3);
+            }
+            if(counter == 3){stab.playSpecific(3);
+            }
+        
+            if(counter == 6){stab.playSpecific(3);
+            }
+            if(counter == 8){stab.playSpecific(3);
+            }}
+      
 
         }
     }
 
      function drumTrigger(){
-        counter4 = 1;
-        let pCounter = 1;
+
 
         return function(){
-            if(counter4 > 16 ) counter4 = 1, pCounter++;
-        
-            
- 
-            //console.log("phrase 2");
-            if(counter4 == 1){drums.playSpecific(0);}
-            if(counter4 == 3){drums.playSpecific(2);}
-            if(counter4 == 6){drums.playSpecific(0);}
-            if(counter4 == 7){drums.playSpecific(2);}
-            if(counter4 == 11){drums.playSpecific(2);}
-            if(counter4 == 12){drums.playSpecific(0);}
-            if(counter4 == 14){drums.playSpecific(0);}
-            if(counter4 == 15){drums.playSpecific(2);}
+   
+            if(counter == 1){drums.playSpecific(0);}
+            if(counter == 3){drums.playSpecific(2);}
+            if(counter == 6){drums.playSpecific(0);}
+            if(counter == 7){drums.playSpecific(2);}
+            if(counter == 11){drums.playSpecific(2);}
+            if(counter == 12){drums.playSpecific(0);}
+            if(counter == 14){drums.playSpecific(0);}
+            if(counter == 15){drums.playSpecific(2);}
 
 
       
 
-            counter4++;
+            ;
                
         }
     }
@@ -423,8 +357,8 @@ function createRunMusicSimulatorSession(){
 
     //Listeners
     const peakListeners = {
-        onHiPeakEvents: [() => percs.playRandom(), drumTrigger()], //() 
-        onLoPeakEvents: [() => percs.playRandom(), drumTrigger(), subTrigger()] //[() => bass.playSequence()]
+        onHiPeakEvents: [barCounter(),() => percs.playRandom(), drumTrigger(), bassTrigger(), stabTrigger()], //() bassTrigger()
+        onLoPeakEvents: [barCounter(), () => percs.playRandom(), drumTrigger(), bassTrigger(), stabTrigger()] //[() => bass.playSequence()]bassTrigger()
     }
 
     //
@@ -462,9 +396,9 @@ function createRunMusicSimulatorSession(){
 
     //These need to get called in both simulator and runrecorder!!!!
     function onActivate(){
-        bass.setAmp(0.4);
-        bleeps.setAmp(0.1)
-        pads.setAmp(0.5)
+        bass.setAmp(0.6);
+        stab.setAmp(0.6);
+      
         percs.setAmp(0.1)
  
     }
@@ -499,12 +433,4 @@ function createRunMusicSimulatorSession(){
         get render(){return render}
     }
 }
-
-const runMusicSimulatorPreset = createRunMusicSimulatorSession();
-
-MobileAppProcessors.push({
-    simulatorSession: runMusicSimulatorPreset, 
-    processorArray: runMusicSimulatorPreset.processors, 
-    name: "Run Music"
-});
 
