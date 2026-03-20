@@ -263,7 +263,6 @@ function createRunMusicSimulatorSession(){
             console.log(counter)
             console.log(counter == 1)
             if(counter == 1 && bar == 1 ){bass.playSpecific(0);
-                console.log("hej")
                 
             }
             if(counter == 1 && bar == 2){bass.playSpecific(1);
@@ -338,13 +337,13 @@ function createRunMusicSimulatorSession(){
         return function(){
    
             if(counter == 1){drums.playSpecific(0);}
-            if(counter == 3){drums.playSpecific(2);}
+            if(counter == 3){drums.playSpecific(1);}
             if(counter == 6){drums.playSpecific(0);}
-            if(counter == 7){drums.playSpecific(2);}
-            if(counter == 11){drums.playSpecific(2);}
+            if(counter == 7){drums.playSpecific(1);}
+            if(counter == 11){drums.playSpecific(1);}
             if(counter == 12){drums.playSpecific(0);}
             if(counter == 14){drums.playSpecific(0);}
-            if(counter == 15){drums.playSpecific(2);}
+            if(counter == 15){drums.playSpecific(1);}
 
 
       
