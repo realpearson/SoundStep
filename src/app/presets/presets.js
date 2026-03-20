@@ -260,8 +260,7 @@ function createRunMusicSimulatorSession(){
         
 
         return function(){
-            console.log(counter)
-            console.log(counter == 1)
+    
             if(counter == 1 && bar == 1 ){bass.playSpecific(0);
                 
             }
