@@ -230,9 +230,9 @@ function createRunMusicSimulatorSession(){
     const percs = createRandomizer(percAddresses);
 
     //Drum
-    const drumPath = "assets/audio_files/CollabMusic/drum/Collaborative drum ";
+    const drumPath = "assets/audio_files/Study/C3/Drum/Drum ";
     let drumAddresses = [];
-    for(let i = 0; i < 3; i++) drumAddresses.push(drumPath + (i +1) + ".wav");
+    for(let i = 0; i < 2; i++) drumAddresses.push(drumPath + (i +1) + ".wav");
     const drums = createRandomizer(drumAddresses);
 
 
@@ -335,15 +335,15 @@ function createRunMusicSimulatorSession(){
 
         return function(){
    
-            console.log("snare 1 tst")
+            console.log("Mono snare test 11:56")
             if(counter == 1){drums.playSpecific(0);}
-            if(counter == 3){drums.playSpecific(2);}
+            if(counter == 3){drums.playSpecific(1);}
             if(counter == 6){drums.playSpecific(0);}
-            if(counter == 7){drums.playSpecific(2);}
-            if(counter == 11){drums.playSpecific(2);}
+            if(counter == 7){drums.playSpecific(1);}
+            if(counter == 11){drums.playSpecific(1);}
             if(counter == 12){drums.playSpecific(0);}
             if(counter == 14){drums.playSpecific(0);}
-            if(counter == 15){drums.playSpecific(2);}
+            if(counter == 15){drums.playSpecific(1);}
 
 
       
