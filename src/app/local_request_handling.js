@@ -71,7 +71,6 @@ function createDeviceSensorHandler(){
 
   //Dispose, return different object/ error if permissions failed or events are undefined?
   if(!permissonGranted) return null;
-  alert("Sensor Permissions Granted");
 
   window.addEventListener("devicemotion", (event)=> {
     accelerationX = event.acceleration.x || 0;
@@ -105,11 +104,7 @@ function createDeviceSensorHandler(){
   }
 }
 
-let deviceSensorHandler = createDeviceSensorHandler();
-
-if(deviceSensorHandler === null) Window.addEventListener("pointerdown", ()=> deviceSensorHandler = createDeviceSensorHandler(), {once: true});
-
-
+let deviceSensorHandler;
 //---------------------------------Import Export Data-------------------------------------//
 
 //Export run data from mobile application

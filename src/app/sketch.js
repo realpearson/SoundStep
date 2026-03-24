@@ -2,52 +2,42 @@ const appDiv = document.getElementById("AppView");
 const appCanvas = document.getElementById("appCnv");
 const desktopDiv = document.getElementById("DesktopView");
 const desktopCanvas = document.getElementById("desktopCnv");
-const appState = createAppState();
-
-//const testSound1 = new soundContainer("assets/audio_files/notes-1.wav", audioCtx);
-//const testSound2 = new soundContainer("assets/audio_files/notes-2.wav", audioCtx);
 
 //https://getcssscan.com/css-buttons-examples
 //https://www.fasttalklabs.com/physiology/how-to-analyze-running-form/
 
-//Scripts/ folders
-//data_processing
-//sound_engine
-//desktop_sandbox
-//mobile_app
-//>UX
-//>Recorder
+let AppMode = "none";
 
 
-//desktop_sandbox, user_app
-function createAppState(){
-  let mode = window.innerWidth <= 600 ? "mobile" : "desktop";
-  
-  return {
-    get modes(){return {mobile: "mobile", desktop: "desktop"}},
-    get mode(){return mode},
-  }
-}
+const appModeSelectElt = document.getElementById("selectAppMode");
 
+function AppModeSelectListener(event){
 
-function setup() {  
-  if(appState.mode === appState.modes.mobile){
+  AppMode = event.target.value;
+
+  if(AppMode === "Mobile"){
     appDiv.hidden = false;
+    deviceSensorHandler = createDeviceSensorHandler();
     createCanvas(window.innerWidth, window.innerHeight, appCanvas);
     initializeRunRecorder();
     
   }
   
-  if(appState.mode === appState.modes.desktop){
+  if(AppMode === "Sandbox"){
     desktopDiv.hidden = false;
     createCanvas(900, 900, desktopCanvas);
   }
 
+  appModeSelectElt.hidden = true;
 }
 
+appModeSelectElt.addEventListener("change", AppModeSelectListener);
+
 function draw() {
+
+  if(AppMode === "none") return;
   
-  if(appState.mode === appState.modes.mobile){
+  if(AppMode === "Mobile"){
     //Make all this pg or something...
     background(29);
     //image(logo, -65, 0);
@@ -87,43 +77,15 @@ function draw() {
     rect(width/4 + width/4, height/4 + width/4-width/5, width/5, width/5);
   }
   
-  if(appState.mode === appState.modes.desktop){
+  if(AppMode === "Sandbox"){
     background(220);
     updateSimulator();
   }
-
-  
-  /*
-  //Render Buffers
-  let yPos = 50//400;
-  buffers.forEach((buffer) => {
-    renderDataCurve(buffer, 1, yPos);
-    yPos+=50;
-  });
-  */
 }
 
 
 
-function mousePressed(){
-  //console.log(frameRate());
-  //if(simulator) simulator.increment(true);
-  
-  if(appState.mode === appState.modes.mobile){
-    //fullscreen(true);
-    //resizeCanvas(windowWidth, windowHeight);
-    //initializeAppUX();
-  }
-  
-}
 
-function windowResized() {
-  if(appState.mode === appState.modes.mobile){
-    //resizeCanvas(windowWidth, windowHeight);
-    //initializeAppUX();
-  }
-}
-function keyPressed(){}
 
 
 
