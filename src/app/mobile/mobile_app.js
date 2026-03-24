@@ -5,12 +5,13 @@ const desktopCanvas = document.getElementById("desktopCnv");
 
 //https://getcssscan.com/css-buttons-examples
 //https://www.fasttalklabs.com/physiology/how-to-analyze-running-form/
-
 const permissionsButton = document.getElementById("permissionsButton");
 
 if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function"){
     alert("not iOS");
     permissionsButton.hidden = true;
+    document.getElementById("AppView").hidden = false;
+
 } else {
     alert("iOS");
     permissionsButton.addEventListener("pointerdown", requestSensorPermission, {once: true});
@@ -23,6 +24,13 @@ if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.request
 
 
 function draw() {
+    let ready = false;
+    if(!ready && permissionState === "Not Needed" || permissionState === "Granted"){
+        createCanvas(window.innerWidth, window.innerHeight, appCanvas);
+        initializeRunRecorder();
+        ready = true;
+    }
+    if(!ready) return;
 
     //Make all this pg or something...
     background(29);
