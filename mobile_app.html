@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+    <main>
+
+        <button id="permissionsButton" class="button-1" style="position: absolute;">Allow Sensors</button>
+
+        <div id="AppView" hidden="true">
+            <canvas id="appCnv"></canvas>
+            <p id="Title" style="position: absolute; font-size: 60px; color:rgb(241, 240, 234);">sound step</p>
+            <select id="SonificationPresets" style="font-size: 20px; position: absolute; width: 200px; height:50px;">
+            <option>Select Style:</option>
+            </select>
+            <button id="saveBttn" class="button-1" style="position: absolute;">SAVE</button>
+            <button id="recordBttn" class="button-1" style="position: absolute;">Record</button>
+        </div>
+
+    </main>
+    <!--RESOURCES-->
+    <script src="libs/p5.js"></script>
+
+    <script src="libs/sound_engine/audio_system.js"></script>
+    <script src="libs/sound_engine/es1_synth.js"></script>
+    <script src="libs/sound_engine/app.js"></script>
+    <script src="libs/sound_engine/sound_engine.js"></script>
+
+    <!--SYSTEM-->
+    <script src="src/sound_step_system/processors.js"></script>
+    <script src="src/sound_step_system/session.js"></script>
+    <script src="src/sound_step_system/simulator.js"></script>
+
+    <!--PRESETS-->
+    <script src="src/app/presets/presets.js"></script>
+    <script src="src/app/presets/legacy_presets.js"></script>
+    <script src="src/app/presets/preset_loader.js"></script>
+    
+    <!--APP-->
+    <script src="src/app/local_request_handling.js"></script>
+    <script src="src/app/runrecorder.js"></script>
+    <script src="src/app/dataviewer.js"></script>
+    <script src="src/app/sketch.js"></script>
+  </body>
+</html>
