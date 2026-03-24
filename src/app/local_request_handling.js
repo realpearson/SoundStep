@@ -49,13 +49,14 @@ function createDeviceSensorHandler(){
   let rotationY = 0;
   let rotationZ = 0;
 
+  let permissonGranted = true;
 
   if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
     DeviceMotionEvent.requestPermission()
       .then((response) => {
         if (response == "granted") {
 
-        }
+        } else permissonGranted = false;
       }).catch(alert);
   } //else-> DeviceMotionEvent is not defined
 
@@ -64,9 +65,13 @@ function createDeviceSensorHandler(){
       .then((response) => {
         if (response == "granted") {
 
-        }
+        } else permissonGranted = false;
       }).catch(alert);
   } //else-> DeviceMotionEvent is not defined
+
+  //Dispose, return different object/ error if permissions failed or events are undefined?
+  if(!permissonGranted) return null;
+  alert("Sensor Permissions Granted");
 
   window.addEventListener("devicemotion", (event)=> {
     accelerationX = event.acceleration.x || 0;
@@ -84,9 +89,6 @@ function createDeviceSensorHandler(){
     rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
   });
 
-
-  //Dispose, return different object/ error if permissions failed or events are undefined?
-
   return {
     //Device Motion
     get accelerationX(){return accelerationX},
@@ -103,7 +105,9 @@ function createDeviceSensorHandler(){
   }
 }
 
-const deviceSensorHandler = createDeviceSensorHandler();
+let deviceSensorHandler = createDeviceSensorHandler();
+
+if(deviceSensorHandler === null) Window.addEventListener("pointerdown", ()=> deviceSensorHandler = createDeviceSensorHandler(), {once: true});
 
 
 //---------------------------------Import Export Data-------------------------------------//

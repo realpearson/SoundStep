@@ -4,8 +4,8 @@ const desktopDiv = document.getElementById("DesktopView");
 const desktopCanvas = document.getElementById("desktopCnv");
 const appState = createAppState();
 
-const testSound1 = new soundContainer("assets/audio_files/notes-1.wav", audioCtx);
-const testSound2 = new soundContainer("assets/audio_files/notes-2.wav", audioCtx);
+//const testSound1 = new soundContainer("assets/audio_files/notes-1.wav", audioCtx);
+//const testSound2 = new soundContainer("assets/audio_files/notes-2.wav", audioCtx);
 
 //https://getcssscan.com/css-buttons-examples
 //https://www.fasttalklabs.com/physiology/how-to-analyze-running-form/
