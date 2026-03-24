@@ -28,9 +28,34 @@ function debugResponse(response){
 
 
 //---------------------------------Sensor Events-------------------------------------//
+let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") ? "Needed" : "Not Needed";
 
-//Some kind of object to house all these values...
+function requestSensorPermission(){
+  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+    DeviceMotionEvent.requestPermission()
+      .then((response) => {
+        if (response == "granted") {
+          permissionState = "Granted";
+        } else permissionState = "Failed";
+      }).catch(alert);
+  } //else-> DeviceMotionEvent is not defined
+
+  if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+    DeviceOrientationEvent.requestPermission()
+      .then((response) => {
+        if (response == "granted") {
+          permissionState = "Granted";
+        } else permissionState = "Failed";
+      }).catch(alert);
+  } //else-> DeviceMotionEvent is not defined
+
+  if(permissionState === "Granted") deviceSensorHandler = createDeviceSensorHandler();
+  else alert(permissionState);
+}
+
 function createDeviceSensorHandler(){
+
+  if(permissionState === "Failed" || permissionState === "Needed") return null;
 
   //Device Motion Buffers
   let accelerationX = 0;
@@ -48,29 +73,6 @@ function createDeviceSensorHandler(){
   let rotationX = 0;
   let rotationY = 0;
   let rotationZ = 0;
-
-  let permissonGranted = true;
-
-  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-    DeviceMotionEvent.requestPermission()
-      .then((response) => {
-        if (response == "granted") {
-
-        } else permissonGranted = false;
-      }).catch(alert);
-  } //else-> DeviceMotionEvent is not defined
-
-  if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-    DeviceOrientationEvent.requestPermission()
-      .then((response) => {
-        if (response == "granted") {
-
-        } else permissonGranted = false;
-      }).catch(alert);
-  } //else-> DeviceMotionEvent is not defined
-
-  //Dispose, return different object/ error if permissions failed or events are undefined?
-  if(!permissonGranted) return null;
 
   window.addEventListener("devicemotion", (event)=> {
     accelerationX = event.acceleration.x || 0;

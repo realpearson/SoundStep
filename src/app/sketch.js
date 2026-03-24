@@ -17,7 +17,7 @@ function AppModeSelectListener(event){
 
   if(AppMode === "Mobile"){
     appDiv.hidden = false;
-    deviceSensorHandler = createDeviceSensorHandler();
+    if(deviceSensorHandler === null) requestSensorPermission();
     createCanvas(window.innerWidth, window.innerHeight, appCanvas);
     initializeRunRecorder();
     
