@@ -7,12 +7,14 @@ const desktopCanvas = document.getElementById("desktopCnv");
 //https://www.fasttalklabs.com/physiology/how-to-analyze-running-form/
 
 const permissionsButton = document.getElementById("permissionsButton");
-if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function"){
+if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function"){
     permissionsButton.hidden = true;
 } else {
     permissionsButton.addEventListener("pointerdown", ()=> {
         requestSensorPermission();
         permissionsButton.hidden = true;
+        alert(permissionState);
+        document.getElementById("AppView").hidden = false;
     });
 }
 
