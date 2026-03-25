@@ -26,8 +26,12 @@ function setup(){
     createCanvas(window.innerWidth, window.innerHeight, appCanvas);
 }
 
+const debugElt = document.getElementById("debugP");
+let ready = false;
+
 function draw() {
-    let ready = false;
+    debugElt.textContent = permissionState;
+
     if(!ready && permissionState === "Not Needed" || permissionState === "Granted"){
         deviceSensorHandler = createDeviceSensorHandler();
         resizeCanvas(window.innerWidth, window.innerHeight);
