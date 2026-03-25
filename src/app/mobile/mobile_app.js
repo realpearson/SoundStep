@@ -22,12 +22,15 @@ if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.request
     });
 }
 
+function setup(){
+    createCanvas(window.innerWidth, window.innerHeight, appCanvas);
+}
 
 function draw() {
     let ready = false;
     if(!ready && permissionState === "Not Needed" || permissionState === "Granted"){
         deviceSensorHandler = createDeviceSensorHandler();
-        createCanvas(window.innerWidth, window.innerHeight, appCanvas);
+        resizeCanvas(window.innerWidth, window.innerHeight);
         initializeRunRecorder();
         ready = true;
     }
