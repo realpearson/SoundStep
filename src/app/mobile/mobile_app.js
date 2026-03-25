@@ -8,12 +8,12 @@ const desktopCanvas = document.getElementById("desktopCnv");
 const permissionsButton = document.getElementById("permissionsButton");
 
 if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function"){
-    alert("not iOS");
+    //alert("not iOS");
     permissionsButton.hidden = true;
     document.getElementById("AppView").hidden = false;
 
 } else {
-    alert("iOS");
+    //alert("iOS");
     permissionsButton.addEventListener("mousedown", requestSensorPermission, {once: true});
 
     permissionsButton.addEventListener("pointerdown", ()=> {

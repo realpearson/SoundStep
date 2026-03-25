@@ -34,7 +34,9 @@ function requestSensorPermission(){
   if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
     DeviceMotionEvent.requestPermission()
       .then((response) => {
+        alert("enter"); 
         if (response == "granted") {
+          alert("resp" + response);
           permissionState = "Granted";
         } else permissionState = "Failed";
       }).catch(alert);
@@ -95,11 +97,13 @@ function createDeviceSensorHandler(){
     rotationRateZ = event.rotationRate.beta || 0;
   });
   
-    window.addEventListener("deviceorientation", (event)=> {
+  /*
+  window.addEventListener("deviceorientation", (event)=> {
     rotationX = event.alpha; // 0 (inclusive) to 360 (exclusive)
     rotationY = event.gamma; //-90 (inclusive) to 90 (exclusive). Left to right motion of the device.
     rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
   });
+  */
 
   return {
     //Device Motion
