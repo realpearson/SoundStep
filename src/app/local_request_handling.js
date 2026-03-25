@@ -39,6 +39,17 @@ function requestSensorPermission(){
         } else permissionState = "Failed";
       }).catch(alert);
   } //else-> DeviceMotionEvent is not defined
+}
+
+function requestSensorPermissionnnn(){
+  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+    DeviceMotionEvent.requestPermission()
+      .then((response) => {
+        if (response == "granted") {
+          permissionState = "Granted";
+        } else permissionState = "Failed";
+      }).catch(alert);
+  } //else-> DeviceMotionEvent is not defined
 
   if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
     DeviceOrientationEvent.requestPermission()
@@ -106,7 +117,7 @@ function createDeviceSensorHandler(){
   }
 }
 
-let deviceSensorHandler;
+const deviceSensorHandler = createDeviceSensorHandler();
 //---------------------------------Import Export Data-------------------------------------//
 
 //Export run data from mobile application
