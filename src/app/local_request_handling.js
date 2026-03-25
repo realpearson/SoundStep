@@ -123,7 +123,7 @@ function createDeviceSensorHandler(){
   }
 }
 
-const deviceSensorHandler = createDeviceSensorHandler();
+let deviceSensorHandler; // = createDeviceSensorHandler();
 //---------------------------------Import Export Data-------------------------------------//
 
 //Export run data from mobile application

@@ -26,6 +26,7 @@ if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.request
 function draw() {
     let ready = false;
     if(!ready && permissionState === "Not Needed" || permissionState === "Granted"){
+        deviceSensorHandler = createDeviceSensorHandler();
         createCanvas(window.innerWidth, window.innerHeight, appCanvas);
         initializeRunRecorder();
         ready = true;
