@@ -32,6 +32,7 @@ let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof Device
 
 function requestSensorPermission(){
   if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+    alert("requesting")
     DeviceMotionEvent.requestPermission()
       .then((response) => {
         alert("enter"); 
