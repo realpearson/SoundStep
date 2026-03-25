@@ -42,6 +42,7 @@ function requestSensorPermission(){
         } else permissionState = "Failed";
       }).catch(alert);
   } //else-> DeviceMotionEvent is not defined
+  alert(permissionState);
 }
 
 function requestSensorPermissionnnn(){
