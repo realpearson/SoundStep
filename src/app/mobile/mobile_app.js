@@ -14,7 +14,7 @@ if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.request
 
 } else {
     alert("iOS");
-    permissionsButton.addEventListener("pointerdown", requestSensorPermission, {once: true});
+    permissionsButton.addEventListener("mousedown", requestSensorPermission, {once: true});
 
     permissionsButton.addEventListener("pointerdown", ()=> {
         permissionsButton.hidden = true;
