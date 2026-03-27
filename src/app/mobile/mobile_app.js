@@ -39,9 +39,9 @@ function awakeFunc(){
             applicationState = APPLICATION_STATES.SETUP;
             setupFunc();
         };
-        permissionsButton.addEventListener("mousedown", requestSensorPermission, {once: true});
+        permissionsButton.addEventListener("pointerup", requestSensorPermission, {once: true});
     
-        permissionsButton.addEventListener("pointerdown", ()=> {
+        permissionsButton.addEventListener("click", ()=> {
             permissionsButton.hidden = true;
         });
     }
@@ -55,7 +55,7 @@ function setupFunc(){
 }
 
 function mainFunc(){
-    
+
     if(applicationState.EXIT) {
         exitFunc();
         return;
