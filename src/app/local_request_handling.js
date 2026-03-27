@@ -30,20 +30,53 @@ function debugResponse(response){
 //---------------------------------Sensor Events-------------------------------------//
 let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") ? "Needed" : "Not Needed";
 
-function requestSensorPermission(){
+//Use event/ dom obj to store what should happen when this resolves
+async function requestSensorPermission(e){
+
   if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-    alert("requesting")
-    DeviceMotionEvent.requestPermission()
-      .then((response) => {
-        alert("enter"); 
-        if (response == "granted") {
-          alert("resp" + response);
-          permissionState = "Granted";
-        } else permissionState = "Failed";
-      }).catch(alert);
-  } //else-> DeviceMotionEvent is not defined
-  alert(permissionState);
+    return;
+  } 
+
+  alert("requesting");
+
+  const permission = await DeviceMotionEvent.requestPermission();
+  
+  alert(permission.response);
+  
+  if(permission === "granted"){
+    permissionState = "Granted";
+    e.currentTarget.onGranted();
+  } else {
+    permissionState = "Failed";
+  }
 }
+
+/*  
+DeviceMotionEvent.requestPermission()
+.then((response) => {
+  alert(response); 
+  if (response == "granted") {
+    alert("resp" + response);
+    permissionState = "Granted";
+    e.currentTarget.onGranted();
+  } else permissionState = "Failed";
+}).catch(alert); */
+
+/*document.querySelector("button").addEventListener("click", async () => {
+  if (typeof DeviceMotionEvent.requestPermission !== "function") {
+    // The feature is not available, or does not need permission.
+    return;
+  }
+
+  const permission = await DeviceMotionEvent.requestPermission();
+  if (permission === "granted") {
+    window.addEventListener("devicemotion", (event) => {
+      console.log(`Acceleration X: ${event.acceleration.x}`);
+      console.log(`Acceleration Y: ${event.acceleration.y}`);
+      console.log(`Acceleration Z: ${event.acceleration.z}`);
+    });
+  }
+}); */
 
 function requestSensorPermissionnnn(){
   if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
@@ -123,7 +156,7 @@ function createDeviceSensorHandler(){
   }
 }
 
-let deviceSensorHandler; // = createDeviceSensorHandler();
+let deviceSensorHandler = createDeviceSensorHandler();
 //---------------------------------Import Export Data-------------------------------------//
 
 //Export run data from mobile application
