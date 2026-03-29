@@ -41,7 +41,7 @@ async function requestSensorPermission(e){
 
   const permission = await DeviceMotionEvent.requestPermission();
   
-  alert(permission.response);
+  alert(permission);
   
   if(permission === "granted"){
     permissionState = "Granted";
