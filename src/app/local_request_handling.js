@@ -33,7 +33,7 @@ let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof Device
 //Use event/ dom obj to store what should happen when this resolves
 async function requestSensorPermission(e){
 
-  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+  if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function") {
     return;
   } 
 
@@ -156,7 +156,7 @@ function createDeviceSensorHandler(){
   }
 }
 
-let deviceSensorHandler = createDeviceSensorHandler();
+let deviceSensorHandler;
 //---------------------------------Import Export Data-------------------------------------//
 
 //Export run data from mobile application

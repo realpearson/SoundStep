@@ -40,17 +40,14 @@ function awakeFunc(){
             setupFunc();
         };
         permissionsButton.addEventListener("pointerup", requestSensorPermission, {once: true});
-    
-        permissionsButton.addEventListener("click", ()=> {
-            permissionsButton.hidden = true;
-        });
+        permissionsButton.addEventListener("pointreup", ()=> permissionsButton.hidden = true, {once:true});
     }
 }
 
 
 
 function setupFunc(){
-    //deviceSensorHandler = createDeviceSensorHandler();
+    deviceSensorHandler = createDeviceSensorHandler();
     mainFunc();
 }
 
