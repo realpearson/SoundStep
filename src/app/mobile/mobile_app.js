@@ -15,9 +15,9 @@ const accXElt = document.getElementById("accelX");
 const accYElt = document.getElementById("accelY");
 const accZElt = document.getElementById("accelZ");
 
-const rotXElt = document.getElementById("accelX");
-const rotYElt = document.getElementById("accelX");
-const rotZElt = document.getElementById("accelX");
+const rotXElt = document.getElementById("rotX");
+const rotYElt = document.getElementById("rotY");
+const rotZElt = document.getElementById("rotZ");
 
 //Starts Program
 awakeFunc();
@@ -48,6 +48,7 @@ function awakeFunc(){
 
 function setupFunc(){
     deviceSensorHandler = createDeviceSensorHandler();
+    initializeRunRecorder();
     mainFunc();
 }
 
