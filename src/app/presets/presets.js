@@ -1,4 +1,5 @@
 
+//REPLACEMENT p5 random FUNCTION
 function random(min, max){
     return (Math.random() * (max-min)) + min;
 }

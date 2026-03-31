@@ -144,9 +144,9 @@ function createDeviceSensorHandler(){
 
   return {
     //Device Motion
-    get accelerationX(){return mockX()},//{return accelerationX},
-    get accelerationY(){return mockY()},//{return accelerationY},
-    get accelerationZ(){return mockZ()},//{return accelerationZ},
+    get accelerationX(){return accelerationX}, //{return mockX()}
+    get accelerationY(){return accelerationY},
+    get accelerationZ(){return accelerationZ},
     get rotationRateX(){return rotationRateX},
     get rotationRateY(){return rotationRateY},
     get rotationRateZ(){return rotationRateZ},
