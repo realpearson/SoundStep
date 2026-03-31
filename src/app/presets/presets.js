@@ -1,4 +1,8 @@
 
+function random(min, max){
+    return (Math.random() * (max-min)) + min;
+}
+
 function createC1SimulatorSession(){
     //Setup Sounds
     
