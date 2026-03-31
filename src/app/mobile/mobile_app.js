@@ -1,3 +1,8 @@
+//####################################-STATE & GLOBALS-####################################//
+let currentSession = createSession();
+let currentSimPreset;
+let recordingOn = false;
+
 //Make this to state machine later
 const APPLICATION_STATES = {
     AWAKE: "awake",
@@ -10,7 +15,10 @@ const APPLICATION_STATES = {
 
 let applicationState = APPLICATION_STATES.AWAKE;
 
-//DOM Element References
+
+//####################################-DOM ELEMENTS-####################################//
+
+//Sensors
 const permissionsButton = document.getElementById("permissionsButton");
 const accXElt = document.getElementById("accelX");
 const accYElt = document.getElementById("accelY");
@@ -19,6 +27,45 @@ const accZElt = document.getElementById("accelZ");
 const rotXElt = document.getElementById("rotX");
 const rotYElt = document.getElementById("rotY");
 const rotZElt = document.getElementById("rotZ");
+
+const sonificationPresets = document.getElementById("SonificationPresets");
+
+MobileAppProcessors.forEach((preset) => {
+  const opt = document.createElement("option");
+  opt.value = preset.name;
+  opt.innerHTML = preset.name;
+  sonificationPresets.appendChild(opt);
+});
+
+sonificationPresets.addEventListener("change", () => {
+  let ind = -1;
+  for(let i = 0; i < MobileAppProcessors.length; i++){
+    if(MobileAppProcessors[i].name === sonificationPresets.value) ind = i;
+  }
+  if(ind === -1) return;
+  const procArr = MobileAppProcessors[ind].processorArray;
+  currentSimPreset?.onDeactivate();
+  currentSimPreset = MobileAppProcessors[ind].simulatorSession;
+  currentSession = createSession();
+  procArr.forEach((proc) => currentSession.connectLowLevelProcessor(proc.processor, proc.processorType, proc.sensorType, proc.dataType));
+});
+
+const saveBttn = document.getElementById("saveBttn");
+const recordBttn = document.getElementById("recordBttn");
+
+recordBttn.onclick = () => {
+  recordingOn = !recordingOn;
+  recordBttn.style.backgroundColor = recordingOn ? "#F082AC" : "#EA4C89";
+    if(recordingOn) currentSimPreset.onActivate();
+    else currentSimPreset.onDeactivate();
+};
+
+saveBttn.onclick = () => {
+  exportData(currentSession.sessionData)
+};
+
+
+//####################################-PROGRAM FLOW-####################################//
 
 //Starts Program
 awakeFunc();
@@ -45,11 +92,8 @@ function awakeFunc(){
     }
 }
 
-
-
 function setupFunc(){
     deviceSensorHandler = createDeviceSensorHandler();
-    initializeRunRecorder();
     mainFunc();
     alert("setup");
 }
@@ -65,13 +109,14 @@ function mainFunc(){
         window.requestAnimationFrame(mainFunc);
         return;
     };
+    
 
-    accXElt.textContent = deviceSensorHandler.accelerationX;
-    accYElt.textContent = deviceSensorHandler.accelerationY;
-    accZElt.textContent = deviceSensorHandler.accelerationZ;
-    //rotXElt.textContent = deviceSensorHandler.rotationX;
-    //rotYlt.textContent = deviceSensorHandler.rotationY;
-    //rotZElt.textContent = deviceSensorHandler.rotationZ;
+    accXElt.textContent = formatDecimal(deviceSensorHandler.accelerationX, 2, "X:");
+    accYElt.textContent = formatDecimal(deviceSensorHandler.accelerationY, 2, "Y:");
+    accZElt.textContent = formatDecimal(deviceSensorHandler.accelerationZ, 2, "Z:");
+    rotXElt.textContent = deviceSensorHandler.rotationX;
+    rotYElt.textContent = deviceSensorHandler.rotationY;
+    rotZElt.textContent = deviceSensorHandler.rotationZ;
 
     window.requestAnimationFrame(mainFunc);
 }
@@ -81,10 +126,17 @@ function exitFunc(){
 
 }
 
+function errorFunc(){}
 
 
 
+//####################################-HELPER FUNCS-####################################//
 
+function formatDecimal(num, digits, prefix){
+  const formatNum = Math.floor(num * Math.pow(10, digits))/ Math.pow(10, digits);
+  if(Math.sign(num) < 0) return (prefix || '') + formatNum.toString();
+  return ((prefix || '') + ' ' + formatNum.toString());
+}
 
 /*
 function setup(){

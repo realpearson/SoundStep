@@ -15,18 +15,22 @@
         <div id="AppView">
 
             <p id="Title" style="position: relative; font-size: 60px; color:rgb(241, 240, 234);">SoundStep</p>
-            <select id="SonificationPresets" style="font-size: 20px; position: absolute; width: 200px; height:50px;">
+            
+            <select id="SonificationPresets" style="font-size: 20px; width: 200px; height:50px;">
             <option>Select Style:</option>
             </select>
 
-            <p id="accelX">...</p>
-            <p id="accelY">...</p>
-            <p id="accelZ">...</p>
-
-            <p id="rotX">...</p>
-            <p id="rotY">...</p>
-            <p id="rotZ">...</p>
-
+            <div>
+              <p>Acceleration</p>
+              <p id="accelX" style="white-space: pre;">...</p>
+              <p id="accelY" style="white-space: pre;">...</p>
+              <p id="accelZ" style="white-space: pre;">...</p>
+              <p>Rotation</p>
+              <p id="rotX" style="white-space: pre;">...</p>
+              <p id="rotY" style="white-space: pre;">...</p>
+              <p id="rotZ" style="white-space: pre;">...</p>
+            </div>
+  
             <button id="saveBttn">SAVE</button>
             <button id="recordBttn">Record</button>
         </div>
@@ -52,7 +56,6 @@
     
     <!--APP-->
     <script src="src/app/local_request_handling.js"></script>
-    <script src="src/app/runrecorder.js"></script>
     <script src="src/app/mobile/mobile_app.js"></script>
     <!--<script src="src/app/dataviewer.js"></script>-->
     <!--<script src="src/app/sketch.js"></script>-->

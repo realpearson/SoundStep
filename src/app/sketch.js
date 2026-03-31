@@ -1,3 +1,5 @@
+//GET RID OF THIS!!!!!
+
 const appDiv = document.getElementById("AppView");
 const appCanvas = document.getElementById("appCnv");
 const desktopDiv = document.getElementById("DesktopView");
