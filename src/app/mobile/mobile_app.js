@@ -4,7 +4,8 @@ const APPLICATION_STATES = {
     SETUP: "setup",
     LOOP: "loop",
     PAUSE: "pause",
-    EXIT: "exit"
+    EXIT: "exit",
+    ERROR: "error"
 }
 
 let applicationState = APPLICATION_STATES.AWAKE;
@@ -50,6 +51,7 @@ function setupFunc(){
     deviceSensorHandler = createDeviceSensorHandler();
     initializeRunRecorder();
     mainFunc();
+    alert("setup");
 }
 
 function mainFunc(){

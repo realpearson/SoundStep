@@ -34,8 +34,6 @@ let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof Device
 async function requestSensorPermission(e){
 
   const onGranted = e.currentTarget.onGranted;
-  alert(e);
-  alert(onGranted);
 
   if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function") {
     return;
@@ -127,13 +125,13 @@ function createDeviceSensorHandler(){
   let rotationZ = 0;
 
   window.addEventListener("devicemotion", (event)=> {
-    accelerationX = event.acceleration.x || 0;
-    accelerationY = event.acceleration.y || 0;
-    accelerationZ = event.acceleration.z || 0;
+    accelerationX = event.acceleration.x;
+    accelerationY = event.acceleration.y;
+    accelerationZ = event.acceleration.z;
     moveEventInterval = event.interval;
-    rotationRateX = event.rotationRate.alpha || 0;
-    rotationRateY = event.rotationRate.gamma || 0;
-    rotationRateZ = event.rotationRate.beta || 0;
+    rotationRateX = event.rotationRate.alpha;
+    rotationRateY = event.rotationRate.gamma;
+    rotationRateZ = event.rotationRate.beta;
   });
   
   /*
@@ -146,9 +144,9 @@ function createDeviceSensorHandler(){
 
   return {
     //Device Motion
-    get accelerationX(){return accelerationX},
-    get accelerationY(){return accelerationY},
-    get accelerationZ(){return accelerationZ},
+    get accelerationX(){return mockX()},//{return accelerationX},
+    get accelerationY(){return mockY()},//{return accelerationY},
+    get accelerationZ(){return mockZ()},//{return accelerationZ},
     get rotationRateX(){return rotationRateX},
     get rotationRateY(){return rotationRateY},
     get rotationRateZ(){return rotationRateZ},
