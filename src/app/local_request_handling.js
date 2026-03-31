@@ -8,23 +8,30 @@ function requestPreventScreenLock(){
   }).catch(debugError);
 }
 
-let htmlDebug = false;
 
-function debugError(error){
-  console.error(error);
-  if(!htmlDebug) return;
-  const debugDiv = document.getElementById("debug_div");
-  const textNode = document.createTextNode(`${error.name}, ${error.message}`);
-  debugDiv.appendChild(textNode);
-}
+//Fullscreen
+/*
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    toggleFullScreen();
+  }
+});
 
-function debugResponse(response){
-  console.log(response);
-  if(!htmlDebug) return;
-  const debugDiv = document.getElementById("debug_div");
-  const textNode = document.createTextNode(`response: ${response}, type: ${response.type}`);
-  debugDiv.appendChild(textNode);
+const body = document.getElementById("body");
+
+function toggleFullScreen() {
+  if (!document.fullscreenElement) {
+    // If the document is not in full screen mode
+    // make the video full screen
+    console.log("fs")
+    body.requestFullscreen();
+  } else {
+    // Otherwise exit the full screen
+    console.log("ex")
+    document.exitFullscreen?.();
+  }
 }
+  */
 
 
 //---------------------------------Sensor Events-------------------------------------//
