@@ -124,7 +124,7 @@ function createDeviceSensorHandler(){
   let rotationY = 0;
   let rotationZ = 0;
 
-  window.addEventListener("devicemotion", (event)=> {
+  window.addEventListener("devicemotion", (event) => {
     accelerationX = event.acceleration.x;
     accelerationY = event.acceleration.y;
     accelerationZ = event.acceleration.z;
@@ -134,13 +134,13 @@ function createDeviceSensorHandler(){
     rotationRateZ = event.rotationRate.beta;
   });
   
-  /*
+  
   window.addEventListener("deviceorientation", (event)=> {
     rotationX = event.alpha; // 0 (inclusive) to 360 (exclusive)
     rotationY = event.gamma; //-90 (inclusive) to 90 (exclusive). Left to right motion of the device.
     rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
   });
-  */
+  
 
   return {
     //Device Motion

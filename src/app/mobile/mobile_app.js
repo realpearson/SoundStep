@@ -110,13 +110,14 @@ function mainFunc(){
         return;
     };
     
-
+    if(currentSession) currentSession.recordData();
+    
     accXElt.textContent = formatDecimal(deviceSensorHandler.accelerationX, 2, "X:");
     accYElt.textContent = formatDecimal(deviceSensorHandler.accelerationY, 2, "Y:");
     accZElt.textContent = formatDecimal(deviceSensorHandler.accelerationZ, 2, "Z:");
-    rotXElt.textContent = deviceSensorHandler.rotationX;
-    rotYElt.textContent = deviceSensorHandler.rotationY;
-    rotZElt.textContent = deviceSensorHandler.rotationZ;
+    rotXElt.textContent = formatDecimal(deviceSensorHandler.rotationX, 2, "X:");
+    rotYElt.textContent = formatDecimal(deviceSensorHandler.rotationY, 2, "Y:");
+    rotZElt.textContent = formatDecimal(deviceSensorHandler.rotationZ, 2, "Z:");
 
     window.requestAnimationFrame(mainFunc);
 }
