@@ -65,3 +65,32 @@ function updateSimulator(){
   simulator.render();
 }
 
+
+
+////////////SKETCH
+
+const appDiv = document.getElementById("AppView");
+const appCanvas = document.getElementById("appCnv");
+const desktopDiv = document.getElementById("DesktopView");
+const desktopCanvas = document.getElementById("desktopCnv");
+
+
+
+
+function setup(){
+  createCanvas(900, 900, desktopCanvas);
+}
+
+function draw() {
+  background(220);
+  updateSimulator();
+}
+
+
+
+
+
+
+
+
+

@@ -39,18 +39,12 @@ let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof Device
 
 //Use event/ dom obj to store what should happen when this resolves
 async function requestSensorPermission(e){
-
-  const onGranted = e.currentTarget.onGranted;
-
   if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function") {
     return;
   } 
-
-  alert("requesting");
-
-  const permission = await DeviceMotionEvent.requestPermission();
   
-  alert(permission);
+  const onGranted = e.currentTarget.onGranted;
+  const permission = await DeviceMotionEvent.requestPermission();
   
   if(permission === "granted"){
     permissionState = "Granted";

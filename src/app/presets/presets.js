@@ -1,8 +1,8 @@
 
 //REPLACEMENT p5 random FUNCTION
-function random(min, max){
+let random = p5?.random ? p5.random : function random(min, max){
     return (Math.random() * (max-min)) + min;
-}
+};
 
 function createC1SimulatorSession(){
     //Setup Sounds
