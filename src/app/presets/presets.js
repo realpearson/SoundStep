@@ -1,6 +1,6 @@
 
 //REPLACEMENT p5 random FUNCTION
-let random = p5?.random ? p5.random : function random(min, max){
+function getRandom (min, max){
     return (Math.random() * (max-min)) + min;
 };
 
@@ -15,7 +15,7 @@ function createC1SimulatorSession(){
     //Listeners
     const stepListeners = {
         onLoPeakEvents: [
-            () => foots.playRandom(0, random(1, 1.1), random(0.1)),
+            () => foots.playRandom(0, getRandom(1, 1.1), getRandom(0.1)),
           
         ]
     }
@@ -100,7 +100,7 @@ function createC2SimulatorSession(){
     //Listeners
     const stepListeners = {
         onLoPeakEvents: [
-            () => foots.playRandom(0, random(1, 1.1), random(0.1)),
+            () => foots.playRandom(0, getRandom(1, 1.1), getRandom(0.1)),
           
         ]
     }
