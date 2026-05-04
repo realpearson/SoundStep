@@ -166,7 +166,7 @@ function createSession(params){
 function createMockSinData(){
   let theta = ((Math.random()-0.5) * 2) * Math.PI;
   return function(){
-    theta += 0.4;
+    theta += 0.01;
     return Math.sin(theta) * 40;
   }
 }

@@ -8,29 +8,105 @@ function requestPreventScreenLock(){
   }).catch(debugError);
 }
 
-let htmlDebug = false;
 
-function debugError(error){
-  console.error(error);
-  if(!htmlDebug) return;
-  const debugDiv = document.getElementById("debug_div");
-  const textNode = document.createTextNode(`${error.name}, ${error.message}`);
-  debugDiv.appendChild(textNode);
-}
+//Fullscreen
+/*
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    toggleFullScreen();
+  }
+});
 
-function debugResponse(response){
-  console.log(response);
-  if(!htmlDebug) return;
-  const debugDiv = document.getElementById("debug_div");
-  const textNode = document.createTextNode(`response: ${response}, type: ${response.type}`);
-  debugDiv.appendChild(textNode);
+const body = document.getElementById("body");
+
+function toggleFullScreen() {
+  if (!document.fullscreenElement) {
+    // If the document is not in full screen mode
+    // make the video full screen
+    console.log("fs")
+    body.requestFullscreen();
+  } else {
+    // Otherwise exit the full screen
+    console.log("ex")
+    document.exitFullscreen?.();
+  }
 }
+  */
 
 
 //---------------------------------Sensor Events-------------------------------------//
+let permissionState = (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") ? "Needed" : "Not Needed";
 
-//Some kind of object to house all these values...
+//Use event/ dom obj to store what should happen when this resolves
+async function requestSensorPermission(e){
+  if (typeof DeviceMotionEvent === "undefined" || typeof DeviceMotionEvent.requestPermission !== "function") {
+    return;
+  } 
+  
+  const onGranted = e.currentTarget.onGranted;
+  const permission = await DeviceMotionEvent.requestPermission();
+  
+  if(permission === "granted"){
+    permissionState = "Granted";
+    onGranted();
+  } else {
+    permissionState = "Failed";
+  }
+}
+
+/*  
+DeviceMotionEvent.requestPermission()
+.then((response) => {
+  alert(response); 
+  if (response == "granted") {
+    alert("resp" + response);
+    permissionState = "Granted";
+    e.currentTarget.onGranted();
+  } else permissionState = "Failed";
+}).catch(alert); */
+
+/*document.querySelector("button").addEventListener("click", async () => {
+  if (typeof DeviceMotionEvent.requestPermission !== "function") {
+    // The feature is not available, or does not need permission.
+    return;
+  }
+
+  const permission = await DeviceMotionEvent.requestPermission();
+  if (permission === "granted") {
+    window.addEventListener("devicemotion", (event) => {
+      console.log(`Acceleration X: ${event.acceleration.x}`);
+      console.log(`Acceleration Y: ${event.acceleration.y}`);
+      console.log(`Acceleration Z: ${event.acceleration.z}`);
+    });
+  }
+}); */
+
+function requestSensorPermissionnnn(){
+  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+    DeviceMotionEvent.requestPermission()
+      .then((response) => {
+        if (response == "granted") {
+          permissionState = "Granted";
+        } else permissionState = "Failed";
+      }).catch(alert);
+  } //else-> DeviceMotionEvent is not defined
+
+  if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+    DeviceOrientationEvent.requestPermission()
+      .then((response) => {
+        if (response == "granted") {
+          permissionState = "Granted";
+        } else permissionState = "Failed";
+      }).catch(alert);
+  } //else-> DeviceMotionEvent is not defined
+
+  if(permissionState === "Granted") deviceSensorHandler = createDeviceSensorHandler();
+  else alert(permissionState);
+}
+
 function createDeviceSensorHandler(){
+
+  if(permissionState === "Failed" || permissionState === "Needed") return null;
 
   //Device Motion Buffers
   let accelerationX = 0;
@@ -49,47 +125,27 @@ function createDeviceSensorHandler(){
   let rotationY = 0;
   let rotationZ = 0;
 
-
-  if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
-    DeviceMotionEvent.requestPermission()
-      .then((response) => {
-        if (response == "granted") {
-
-        }
-      }).catch(alert);
-  } //else-> DeviceMotionEvent is not defined
-
-  if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-    DeviceOrientationEvent.requestPermission()
-      .then((response) => {
-        if (response == "granted") {
-
-        }
-      }).catch(alert);
-  } //else-> DeviceMotionEvent is not defined
-
-  window.addEventListener("devicemotion", (event)=> {
-    accelerationX = event.acceleration.x || 0;
-    accelerationY = event.acceleration.y || 0;
-    accelerationZ = event.acceleration.z || 0;
+  window.addEventListener("devicemotion", (event) => {
+    accelerationX = event.acceleration.x;
+    accelerationY = event.acceleration.y;
+    accelerationZ = event.acceleration.z;
     moveEventInterval = event.interval;
-    rotationRateX = event.rotationRate.alpha || 0;
-    rotationRateY = event.rotationRate.gamma || 0;
-    rotationRateZ = event.rotationRate.beta || 0;
+    rotationRateX = event.rotationRate.alpha;
+    rotationRateY = event.rotationRate.gamma;
+    rotationRateZ = event.rotationRate.beta;
   });
   
-    window.addEventListener("deviceorientation", (event)=> {
+  
+  window.addEventListener("deviceorientation", (event)=> {
     rotationX = event.alpha; // 0 (inclusive) to 360 (exclusive)
     rotationY = event.gamma; //-90 (inclusive) to 90 (exclusive). Left to right motion of the device.
     rotationZ = event.beta; // -180 (inclusive) to 180 (exclusive). Front to back motion of the device.
   });
-
-
-  //Dispose, return different object/ error if permissions failed or events are undefined?
+  
 
   return {
     //Device Motion
-    get accelerationX(){return accelerationX},
+    get accelerationX(){return accelerationX}, //{return mockX()}
     get accelerationY(){return accelerationY},
     get accelerationZ(){return accelerationZ},
     get rotationRateX(){return rotationRateX},
@@ -103,9 +159,7 @@ function createDeviceSensorHandler(){
   }
 }
 
-const deviceSensorHandler = createDeviceSensorHandler();
-
-
+let deviceSensorHandler;
 //---------------------------------Import Export Data-------------------------------------//
 
 //Export run data from mobile application
